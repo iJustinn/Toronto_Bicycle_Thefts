@@ -7,10 +7,8 @@ output:
   html_document: default
 ---
 
-```{r setup, include=FALSE}
+```{r, include = FALSE, warning = FALSE, message = FALSE}
 knitr::opts_chunk$set(echo = FALSE, include=TRUE, eval=TRUE)
-
-
 
 required_packages <- c("lubridate", "sf", "tidyverse", "readr", "here", "osmdata", "ggplot2")
 for (p in required_packages) {
@@ -52,7 +50,7 @@ bike_thefts_sf <- read_sf(here("data/Bicycle_Thefts_Open_Data.geojson")) |>
   )
 ```
 
-```{r}
+```{r, include = TRUE, warning = FALSE, message = FALSE}
 # Load the dataset
 bike_thefts <- read_csv(here("data/Bicycle_Thefts_Open_Data.csv"))
 
@@ -70,7 +68,7 @@ bike_thefts %>%
 
 
 
-```{r}
+```{r, include = TRUE, warning = FALSE, message = FALSE}
 # Create a pie chart for the status of bicycle thefts
 bike_thefts %>%
   count(STATUS) %>%
@@ -83,7 +81,7 @@ bike_thefts %>%
 
 
 
-```{r}
+```{r, include = TRUE, warning = FALSE, message = FALSE}
 # Create a bar chart for bicycle thefts by day of the week
 bike_thefts %>%
   count(OCC_DOW) %>%
@@ -95,7 +93,7 @@ bike_thefts %>%
 
 
 
-```{r}
+```{r, include = TRUE, warning = FALSE, message = FALSE}
 # Load cleaned coordinates data
 coordinates_data <- read.csv(here("data/cleaned_coordinates_data.csv"))
 
