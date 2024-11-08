@@ -1,23 +1,30 @@
 ---
-title: "A2 Sample"
-author: "Author A & Author B"
-output: html_document
+title: "Spatial and Temporal Analysis of Bicycle Thefts in Toronto"
+subtitle: "Trends, Patterns, and Insights"
+author: "Yingke He, Ziheng Zhong"
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, include=TRUE, eval=TRUE)
-required_packages <- c("lubridate", "sf", "tidyverse")
+required_packages <- c("lubridate", "sf", "tidyverse", "readr", "here")
 for (p in required_packages) {
   if (!require(p, character.only = TRUE)) {
     install.packages(p, character.only = TRUE)
   }
 }
+
 library(tidyverse)
 library(sf)
+library(readr)
+library(here)
+
 # you are welcome to use either the CSV file or the GeoJSON file
 # GeoJSON format maybe useful if you would like to combine
 # an external geospatial dataset
-bike_thefts_csv <- read_csv("data/Bicycle_Thefts_Open_Data.csv") |>
+bike_thefts_csv <- read_csv(here("data/Bicycle_Thefts_Open_Data.csv")) |>
   mutate(
     occurence_date = as_date(
       OCC_DATE, format = "%a, %d %b %Y %H:%M:%S GMT"
@@ -26,7 +33,7 @@ bike_thefts_csv <- read_csv("data/Bicycle_Thefts_Open_Data.csv") |>
       REPORT_DATE, format = "%a, %d %b %Y %H:%M:%S GMT"
     )
   )
-bike_thefts_sf <- read_sf("data/Bicycle_Thefts_Open_Data.geojson") |>
+bike_thefts_sf <- read_sf(here("data/Bicycle_Thefts_Open_Data.geojson")) |>
   mutate(
     occurence_date = as_date(
       OCC_DATE, format = "%a, %d %b %Y %H:%M:%S GMT"
@@ -36,4 +43,5 @@ bike_thefts_sf <- read_sf("data/Bicycle_Thefts_Open_Data.geojson") |>
     )
   )
 ```
+
 
