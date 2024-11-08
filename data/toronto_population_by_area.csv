@@ -1,0 +1,43 @@
+"Population change, 2016 to 2021 for census subdivisions in the Toronto Census metropolitan area"
+"Toronto(Census metropolitan area)"
+Geography,Type,2021,2016,Percent change (%)
+"Toronto","C","2794356","2731571","2.3"
+"Mississauga","CY","717961","721599","-0.5"
+"Brampton","CY","656480","593638","10.6"
+"Markham","CY","338503","328966","2.9"
+"Vaughan","CY","323103","306233","5.5"
+"Oakville","T","213759","193832","10.3"
+"Richmond Hill","T","202022","195022","3.6"
+"Milton","T","132979","110128","20.7"
+"Ajax","T","126666","119677","5.8"
+"Pickering","CY","99186","91771","8.1"
+"Newmarket","T","87942","84224","4.4"
+"Caledon","T","76581","66502","15.2"
+"Halton Hills","T","62951","61161","2.9"
+"Aurora","T","62057","55445","11.9"
+"Whitchurch-Stouffville","T","49864","45837","8.8"
+"Georgina","T","47642","45418","4.9"
+"New Tecumseth","T","43948","34242","28.3"
+"Bradford West Gwillimbury","T","42880","35325","21.4"
+"East Gwillimbury","T","34637","23991","44.4"
+"Orangeville","T","30167","28900","4.4"
+"King","TP","27333","24512","11.5"
+"Uxbridge","TP","21556","21176","1.8"
+"Mono","T","9421","8609","9.4"
+"Chippewas of Georgina Island First Nation","IRI","231","261","-11.5"
+
+Symbols:
+..,not available for a specific reference period
+...,not applicable
+E,use with caution
+F,too unreliable to be published
+r, revised
+x,suppressed to meet the confidentiality requirements of the Statistics Act
+rE,Revised. Use with caution.
+
+"Source: Statistics Canada, 2021 Census of Population."
+
+"How to cite: Statistics Canada. 2022. Focus on Geography Series. 2021 Census."
+"Statistics Canada Catalogue no. 98-404-X2016001. Ottawa, Ontario. Release date: February 9, 2022. Updated on: November 30, 2022."
+"http://www12.statcan.gc.ca/census-recensement/2021/as-sa/fogs-spg/index.cfm?Lang=E"
+
