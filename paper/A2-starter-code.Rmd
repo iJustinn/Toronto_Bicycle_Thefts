@@ -79,9 +79,6 @@ bike_thefts %>%
   coord_polar("y") +
   labs(title = "Bicycle Theft Status (Stolen vs Recovered)") +
   theme_minimal()
-
-# Save the plot
-# ggsave(here("other/charts/theft_status_pie.png"))
 ```
 
 
@@ -94,9 +91,6 @@ bike_thefts %>%
   geom_bar(stat = "identity") +
   labs(title = "Number of Bicycle Thefts by Day of the Week", x = "Day of the Week", y = "Number of Thefts") +
   theme_minimal()
-
-# Save the plot
-# ggsave(here("other/charts/thefts_by_day.png"))
 ```
 
 
@@ -141,9 +135,6 @@ ggplot() +
     panel.grid.minor = element_blank(), # Remove minor grid lines
     axis.text.x = element_text(angle = 45, hjust = 1)
   )
-
-# Save the plot
-# ggsave(here("other/charts/bicycle_theft_heatmap.png"))
 ```
 
 
