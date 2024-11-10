@@ -1,10 +1,14 @@
 ---
-title: "Spatial and Temporal Analysis of Bicycle Thefts in Toronto"
-subtitle: "Trends, Patterns, and Insights"
+title: "Ride at Your Own Risk: Insights into Toronto’s Bicycle Theft Hotspots"
+subtitle: "[To Be Updated....]"
 author: "Yingke He, Ziheng Zhong"
+thanks: "Code and data are available at: [https://github.com/iJustinn/Toronto_Bicycle_Thefts/tree/main](https://github.com/iJustinn/Toronto_Bicycle_Thefts/tree/main)."
+date: today
 output:
-  pdf_document: default
+  pdf_document:
+    latex_engine: xelatex
   html_document: default
+bibliography: references.bib
 ---
 
 ```{r, include = FALSE, warning = FALSE, message = FALSE}
@@ -49,7 +53,7 @@ bike_thefts_sf <- read_sf(here("data/Bicycle_Thefts_Open_Data.geojson")) |>
     )
   )
 ```
-
+Bar chart
 ```{r, include = TRUE, warning = FALSE, message = FALSE}
 # Load the dataset
 bike_thefts <- read_csv(here("data/Bicycle_Thefts_Open_Data.csv"))
@@ -65,9 +69,7 @@ bike_thefts %>%
 # Save the plot
 # ggsave(here("other/charts/thefts_by_month.png"))
 ```
-
-
-
+Pie chart
 ```{r, include = TRUE, warning = FALSE, message = FALSE}
 # Create a pie chart for the status of bicycle thefts
 bike_thefts %>%
@@ -78,9 +80,7 @@ bike_thefts %>%
   labs(title = "Bicycle Theft Status (Stolen vs Recovered)") +
   theme_minimal()
 ```
-
-
-
+Bar chart
 ```{r, include = TRUE, warning = FALSE, message = FALSE}
 # Create a bar chart for bicycle thefts by day of the week
 bike_thefts %>%
@@ -90,9 +90,7 @@ bike_thefts %>%
   labs(title = "Number of Bicycle Thefts by Day of the Week", x = "Day of the Week", y = "Number of Thefts") +
   theme_minimal()
 ```
-
-
-
+Map
 ```{r, include = TRUE, warning = FALSE, message = FALSE}
 # Load cleaned coordinates data
 coordinates_data <- read.csv(here("data/cleaned_coordinates_data.csv"))
@@ -134,7 +132,33 @@ ggplot() +
     axis.text.x = element_text(angle = 45, hjust = 1)
   )
 ```
+# introduction
+write an intro to convey the issue
+the goal of the article :be careful of bikes
+
+# When Are Bikes at the Greatest Risk? A Look at Seasonal and weekly Patterns
+Explore temporal insights, such as trends by month, day of the week with visualizations that reveal when thefts are most likely to occur.
+
+# What Makes a Bike a Target? Analyzing Theft by Bicycle Type and Value
+Discuss any available data on bike types, brands, or values, showing if certain bikes are more vulnerable to theft than others.
+
+# A Decade of Disappearing Bikes: Tracing Theft Trends Over Ten Years
+- timeline
+
+# Mapping the Danger Zones: High-Risk Locations Across Toronto
+Use a map visualization to highlight theft hotspots across Toronto, pointing out neighborhoods or transit hubs with the highest incidence rates.
+
+- map
+
+# Discussion 
+- Consolidation of all the info that we present, we first talk about...this is how all visualizations are connected together, in the future what can be done...
+
+# Conclusion
+- short reminder for the audience, tips to protect their bikes
 
 
-
-
+General tips: 
+ - This paper wants to tell the story about tips to protect bikes
+ 
+ - after every visualizations talk a bit about the visualization itself, key points, make sure the story that we are talking about is proved by this visualization so each plot make sense (for example in 2016 there is a peak in May illustrated by the visualization, why? find relevant news and articels to explain it and cite), 用更descriptive的形式去explain 你的visualization plot with proves. 
+ 
