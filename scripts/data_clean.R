@@ -14,6 +14,7 @@ library(here)  # Added this to ensure 'here' is loaded
 #### Load data ####
 bicycle_thefts <- read_csv(here("data", "Bicycle_Thefts_Open_Data.csv"))
 
+# Clean data
 
 #### Handle missing values ####
 # Example: Remove rows with missing dates
@@ -26,3 +27,130 @@ bicycle_thefts <- bicycle_thefts %>%
 
 #### Save cleaned data ####
 write_csv(bicycle_thefts, here("data", "clean_data.csv"))
+
+# Bicycle theft yearly count
+
+# Load the dataset
+bicycle_thefts <- read_csv(here("data", "Bicycle_Thefts_Open_Data.csv"))
+
+# Count the number of thefts per year, filtering for the years 2014 to 2024
+yearly_counts <- bicycle_thefts %>%
+  filter(OCC_YEAR >= 2014 & OCC_YEAR <= 2024) %>%
+  group_by(OCC_YEAR) %>%
+  summarise(Number_of_Thefts = n())
+
+# Save the results to a new CSV file
+write_csv(yearly_counts, here("data", "Bicycle_Theft_Yearly_Counts_2014_2024.csv"))
+
+### Bicycle theft monthly count
+
+# Load the dataset
+bicycle_thefts <- read_csv(here("data", "Bicycle_Thefts_Open_Data.csv"))
+
+# Count the number of thefts per month for each year, filtering for the years 2014 to 2024
+monthly_counts <- bicycle_thefts %>%
+  filter(OCC_YEAR >= 2014 & OCC_YEAR <= 2024) %>%
+  group_by(OCC_YEAR, OCC_MONTH) %>%
+  summarise(Number_of_Thefts = n(), .groups = "drop")
+
+# Convert OCC_MONTH to a factor with levels in the order from January to December
+monthly_counts <- monthly_counts %>%
+  mutate(OCC_MONTH = factor(OCC_MONTH, levels = c("January", "February", "March", "April", "May", "June", 
+                                                  "July", "August", "September", "October", "November", "December")))
+
+# Sort the data by OCC_YEAR and the ordered OCC_MONTH
+monthly_counts <- monthly_counts %>%
+  arrange(OCC_YEAR, OCC_MONTH)
+
+# Save the results to a new CSV file
+write_csv(monthly_counts, here("data", "Bicycle_Theft_Monthly_Counts_2014_2024_Ordered.csv"))
+
+### number of stolen and found bikes
+
+# Load necessary libraries
+library(dplyr)
+library(readr)
+library(here)
+
+# Load the dataset
+bicycle_thefts <- read_csv(here("data", "Bicycle_Thefts_Open_Data.csv"))
+
+# Count occurrences for each category
+offence_counts <- bicycle_thefts %>%
+  mutate(
+    Offence_Category = case_when(
+      grepl("THEFT", PRIMARY_OFFENCE) ~ "THEFT",
+      grepl("FOUND", PRIMARY_OFFENCE) ~ "FOUND",
+      TRUE ~ "Other"
+    )
+  ) %>%
+  group_by(Offence_Category) %>%
+  summarise(Number_of_Offences = n())
+
+# Display the result
+print(offence_counts)
+
+
+# Save the results to a new CSV file if needed
+write_csv(offence_counts, here("data", "Stolen_Found_Counts.csv"))
+
+### Theft count weekly 
+
+# Load necessary libraries
+library(dplyr)
+library(readr)
+library(here)
+
+# Load the dataset
+bicycle_thefts <- read_csv(here("data", "Bicycle_Thefts_Open_Data.csv"))
+
+# Filter rows where PRIMARY_OFFENCE contains "THEFT"
+theft_data <- bicycle_thefts %>%
+  filter(grepl("THEFT", PRIMARY_OFFENCE))
+
+# Count occurrences of thefts for each day of the week
+theft_counts_by_day <- theft_data %>%
+  group_by(OCC_DOW) %>%
+  summarise(Number_of_Thefts = n())
+
+# Display the result
+print(theft_counts_by_day)
+
+# Save the results to a new CSV file if needed
+write_csv(theft_counts_by_day, here("data", "Theft_Counts_By_Day.csv"))
+
+
+### Theft count monthly
+
+# Load necessary libraries
+library(dplyr)
+library(readr)
+library(here)
+
+# Load the dataset
+bicycle_thefts <- read_csv(here("data", "Bicycle_Thefts_Open_Data.csv"))
+
+# Filter for records within the years 2014 to 2024
+theft_data <- bicycle_thefts %>%
+  filter(OCC_YEAR >= 2014 & OCC_YEAR <= 2024)
+
+# Count the number of FOUND and STOLEN for each month in each year
+theft_counts_by_month <- theft_data %>%
+  group_by(OCC_YEAR, OCC_MONTH) %>%
+  summarise(
+    Found = sum(grepl("FOUND", PRIMARY_OFFENCE)),
+    Stolen = sum(grepl("THEFT", PRIMARY_OFFENCE)),
+    .groups = "drop"
+  )
+
+# Ensure months are in chronological order from January to December
+theft_counts_by_month <- theft_counts_by_month %>%
+  mutate(OCC_MONTH = factor(OCC_MONTH, levels = c("January", "February", "March", "April", "May", "June", 
+                                                  "July", "August", "September", "October", "November", "December"))) %>%
+  arrange(OCC_YEAR, OCC_MONTH)
+
+# Display the result
+print(theft_counts_by_month)
+
+# Save the results to a new CSV file if needed
+write_csv(theft_counts_by_month, here("data", "Theft_and_Found_Counts_By_Month_2014_2024.csv"))
