@@ -1,18 +1,72 @@
 ---
-title: "Ride at Your Own Risk: Insights into Toronto’s Bicycle Theft Hotspots"
-subtitle: "[To Be Updated....]"
-author: "Yingke He, Ziheng Zhong"
 thanks: "Code and data are available at: [https://github.com/iJustinn/Toronto_Bicycle_Thefts/tree/main](https://github.com/iJustinn/Toronto_Bicycle_Thefts/tree/main)."
-date: today
 output: html_document
 bibliography: references.bib
 ---
+---
+output: html_document
+---
 
+<!-- Background image -->
 <style>
 body {
-  background-color: #f0f8ff; /* AliceBlue color */
+  background-image: url('bikes1.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  color: white;
+  font-family: Arial, sans-serif;
 }
-</style> 
+
+.title {
+  font-size: 60px;
+  font-weight: bold;
+  color: #FFC107; /* Yellow color */
+  margin-top: 100px;
+  text-align: left;
+  font-family: 'Georgia'
+}
+
+.subtitle {
+  font-size: 35px;
+  font-weight: normal;
+  color: white;
+  text-align: left;
+  margin-top: 10px;
+  font-family: 'Open Sans', sans-serif;
+}
+
+.description {
+  font-size: 18px;
+  font-weight: normal;
+  color: white;
+  line-height: 1.6;
+  text-align: left;
+  max-width: 600px;
+  margin-top: 20px;
+  font-family: 'Lora'
+}
+
+.author-date {
+  font-size: 18px;
+  font-weight: normal;
+  color: white;
+  text-align: left;
+  margin-top: 30px;
+  font-style: italic;
+}
+</style>
+
+<div class="title">Ride at Your Own Risk: Insights into Toronto’s Bicycle Theft Hotspots</div>
+
+<div class="subtitle">Navigating Toronto’s streets with eyes wide open, this data-driven guide helps cyclists stay ahead of bicycle thieves.</div>
+
+<div class="description">
+Each year, countless bikes disappear from Toronto’s streets, leaving cyclists frustrated and vulnerable. Our analysis digs into patterns and insights across the city, highlighting where and when bicycles are most at risk. With data spanning over a decade, we reveal theft hotspots and provide tips to help keep your bike safe.
+</div>
+
+<div class="author-date">Yingke He, Ziheng Zhong<br>November 12, 2024</div>
+
 
 ```{r, include = FALSE, warning = FALSE, message = FALSE}
 knitr::opts_chunk$set(echo = FALSE, include=TRUE, eval=TRUE)
@@ -54,130 +108,16 @@ bike_thefts_sf <- read_sf(here("data/Bicycle_Thefts_Open_Data.geojson")) |>
     )
   )
 ```
-Map
-```{r, include = TRUE, warning = FALSE, message = FALSE}
-# Load cleaned coordinates data
-coordinates_data <- read.csv(here("data/cleaned_coordinates_data.csv"))
 
-# Get bounding box for Toronto (approximate limits for Toronto)
-toronto_bbox <- c(-79.6303856025883, 43.5822069220627, -79.1180336515019, 43.8554571861712)
+Imagine locking up your bike on a bustling Toronto street, feeling reassured that a strong lock and some common sense will keep it safe. But what if certain seasons, specific bike types, or even certain neighborhoods increase your risk of theft far more than you realize? For many cyclists, bike theft has moved from a distant possibility to an everyday concern, with data revealing just how pervasive the risk can be in Toronto.
 
-# Fetch map data from OpenStreetMap (OSM)
-toronto_map <- opq(bbox = toronto_bbox) %>%
-  add_osm_feature(key = "highway", value = "primary") %>%
-  add_osm_feature(key = 'highway', value = 'secondary') %>%
-  add_osm_feature(key = 'highway', value = 'tertiary') %>%
-  add_osm_feature(key = 'highway', value = 'residential') %>%
-  osmdata_sf()
+In this analysis, we dig into over a decade’s worth of data from the Toronto Police Service to answer key questions: When are bikes at the greatest risk? What makes a bike more likely to be targeted? And where are the theft hotspots cyclists should avoid? Each section of our article addresses a different angle of bike theft in Toronto, from seasonal and weekly theft patterns to variations by bicycle type and value, to pinpointing the city’s most high-risk locations.
 
-# Convert map data to Simple Features (sf) objects
-streets <- toronto_map$osm_lines
-
-# Plot the map with bike theft locations data
-ggplot() +
-  geom_sf(data = streets, color = "gray", size = 0.3, alpha = 0.6) + # OSM street map layer
-  geom_point(
-    data = coordinates_data, aes(x = longitude, y = latitude),
-    size = 0.5, color = "red"
-  ) + # Bike theft points
-  labs(
-    title = "Map of Bicycle Theft Locations in Toronto",
-    x = "Longitude", y = "Latitude"
-  ) +
-  coord_sf(
-    xlim = c(-79.6303856025883, -79.1180336515019),
-    ylim = c(43.5822069220627, 43.8554571861712), expand = FALSE
-  ) +
-  theme_minimal() +
-  theme(
-    panel.background = element_blank(), # Remove panel background
-    panel.grid.major = element_blank(), # Remove major grid lines
-    panel.grid.minor = element_blank(), # Remove minor grid lines
-    axis.text.x = element_text(angle = 45, hjust = 1)
-  )
-```
-# introduction
-write an intro to convey the issue
-the goal of the article :be careful of bikes
+With these insights, we aim to empower cyclists with knowledge that can help them safeguard their bikes and inform Cycle Toronto and local authorities about the areas most in need of intervention. Read on as we trace theft trends over the years, reveal the high-risk locations, and provide practical advice to help protect your bike.
 
 # When Are Bikes at the Greatest Risk? A Look at Seasonal and weekly Patterns
 
-```{r mothly_plot, include = TRUE, warning = FALSE, message = FALSE, fig.width=11, fig.height=5}
-# Load necessary libraries
-library(tidyverse)
-library(ggridges)
-library(cowplot)
-library(here)
-
-# Load your data
-data <- read_csv(here("data", "Theft_and_Found_Counts_By_Month_2014_2024.csv"), show_col_types = FALSE)
-
-# Convert month names to month numbers for ordering
-data <- data %>%
-  mutate(OCC_MONTH_NUM = factor(OCC_MONTH, levels = month.name))
-
-# Specify levels for OCC_YEAR to order from 2014 to 2024
-data$OCC_YEAR <- factor(data$OCC_YEAR, levels = 2014:2024)
-
-# Calculate a scaled height for "Found" data by dividing by the maximum "Found" value
-max_found <- max(data$Found, na.rm = TRUE)
-max_stolen <- max(data$Stolen, na.rm = TRUE)
-
-# Plot for Bikes Found with scaled heights
-plot_found <- ggplot(data, aes(x = OCC_MONTH_NUM, y = OCC_YEAR, 
-                               height = (Found / max_found) * 4, group = OCC_YEAR)) +
-  geom_ridgeline(
-    fill = "#05595B", color = "white", alpha = 0.5, scale = 1, linewidth = 0
-  ) +
-  labs(y = "", x = NULL) +  # Remove x-axis title
-  theme_minimal() +
-  theme(
-    axis.ticks.y = element_blank(),
-    axis.text.y = element_text(size = 12),
-    axis.text.x = element_text(size = 12, angle = 45, hjust = 1),
-    panel.grid.major.x = element_blank(),
-    panel.grid.minor.x = element_blank(),
-    panel.grid.major.y = element_line(size = 0.5),
-    panel.border = element_blank(),
-    plot.title = element_text(size = 10, color = "#05595B", hjust = -0.1, vjust = 1.5),  # Smaller title
-    panel.background = element_rect(fill = "#f0f8ff", color = NA),  # Light blue background for plot area
-    plot.background = element_rect(fill = "#f0f8ff", color = NA)    # Light blue background for overall plot
-  ) +
-  scale_x_discrete(labels = month.abb) +
-  ggtitle("Bikes Found")  # Add title for Bikes Found
-
-# Plot for Bikes Stolen with scaled heights and no borders
-plot_stolen <- ggplot(data, aes(x = OCC_MONTH_NUM, y = OCC_YEAR, 
-                                height = (Stolen / max_stolen) * 4, group = OCC_YEAR)) +
-  geom_ridgeline(
-    fill = "#603601", color = "white", alpha = 0.5, scale = 1, linewidth = 0
-  ) +
-  labs(y = "", x = NULL) +  # Remove x-axis title
-  theme_minimal() +
-  theme(
-    axis.ticks.y = element_blank(),
-    axis.text.y = element_text(size = 12),
-    axis.text.x = element_text(size = 12, angle = 45, hjust = 1),
-    panel.grid.major.x = element_blank(),
-    panel.grid.minor.x = element_blank(),
-    panel.grid.major.y = element_line(size = 0.5),
-    panel.border = element_blank(),
-    panel.background = element_rect(fill = "#f0f8ff", color = NA),  # Light blue background for plot area
-    plot.background = element_rect(fill = "#f0f8ff", color = NA),   # Light blue background for overall plot
-    plot.title = element_text(size = 10, color = "#603601", hjust = -0.1, vjust = 1.5)  # Smaller title
-  ) +
-  scale_x_discrete(labels = month.abb) +
-  ggtitle("Bikes Stolen")  # Add title for Bikes Stolen
-
-# Combine the plots side by side
-combined_plot <- plot_grid(plot_found, plot_stolen, nrow = 1)
-
-# Display the combined plot
-combined_plot
-
-```
-
-```{r interactive_weekly_plot, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=7, fig.height=4}
+```{r interactive_weekly_plot, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=9.5, fig.height=4}
 library(plotly)
 library(readr)
 library(dplyr)
@@ -234,12 +174,96 @@ fig <- fig %>%
         steps = steps
       )
     ),
-    plot_bgcolor = "#f0f8ff",     # Set background color for the plotting area
-    paper_bgcolor = "#f0f8ff"     # Set background color for the entire plot
+    plot_bgcolor = "#faecd5",     # Set background color for the plotting area
+    paper_bgcolor = "#faecd5"     # Set background color for the entire plot
   )
 
 # Display the plot
 fig
+
+```
+
+```{r mothly_plot, include = TRUE, warning = FALSE, message = FALSE, fig.width=11, fig.height=5}
+# Load necessary libraries
+library(tidyverse)
+library(ggridges)
+library(cowplot)
+library(here)
+
+# Load your data
+data <- read_csv(here("data", "Theft_and_Found_Counts_By_Month_2014_2024.csv"), show_col_types = FALSE)
+
+# Convert month names to month numbers for ordering
+data <- data %>%
+  mutate(OCC_MONTH_NUM = factor(OCC_MONTH, levels = month.name))
+
+# Specify levels for OCC_YEAR to order from 2014 to 2024
+data$OCC_YEAR <- factor(data$OCC_YEAR, levels = 2014:2024)
+
+# Calculate a scaled height for "Found" data by dividing by the maximum "Found" value
+max_found <- max(data$Found, na.rm = TRUE)
+max_stolen <- max(data$Stolen, na.rm = TRUE)
+
+# Calculate yearly totals for annotation
+yearly_totals <- data %>%
+  group_by(OCC_YEAR) %>%
+  summarise(Found_Total = sum(Found, na.rm = TRUE), Stolen_Total = sum(Stolen, na.rm = TRUE))
+
+# Plot for Bikes Found with scaled heights and yearly total annotations
+plot_found <- ggplot(data, aes(x = OCC_MONTH_NUM, y = OCC_YEAR, 
+                               height = (Found / max_found) * 4, group = OCC_YEAR)) +
+  geom_ridgeline(
+    fill = "#05595B", color = "white", alpha = 0.5, scale = 1, linewidth = 0
+  ) +
+  labs(y = "", x = NULL) +  # Remove x-axis title
+  theme_minimal() +
+  theme(
+    axis.ticks.y = element_blank(),
+    axis.text.y = element_text(size = 12),
+    axis.text.x = element_text(size = 12, angle = 45, hjust = 1),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.major.y = element_line(size = 0.5),
+    panel.border = element_blank(),
+    plot.title = element_text(size = 14, color = "#05595B", hjust = -0.1, vjust = 1.5),  # Smaller title
+    panel.background = element_rect(fill = "#faecd5", color = NA),  # Light blue background for plot area
+    plot.background = element_rect(fill = "#faecd5", color = NA)    # Light blue background for overall plot
+  ) +
+  scale_x_discrete(labels = month.abb) +
+  ggtitle("Bikes Found") +  # Add title for Bikes Found
+  geom_text(data = yearly_totals, aes(x = 12.5, y = OCC_YEAR, label = Found_Total), 
+            color = "#05595B", hjust = 1, size = 3, inherit.aes = FALSE)
+
+# Plot for Bikes Stolen with scaled heights, no borders, and yearly total annotations
+plot_stolen <- ggplot(data, aes(x = OCC_MONTH_NUM, y = OCC_YEAR, 
+                                height = (Stolen / max_stolen) * 4, group = OCC_YEAR)) +
+  geom_ridgeline(
+    fill = "#603601", color = "white", alpha = 0.5, scale = 1, linewidth = 0
+  ) +
+  labs(y = "", x = NULL) +  # Remove x-axis title
+  theme_minimal() +
+  theme(
+    axis.ticks.y = element_blank(),
+    axis.text.y = element_text(size = 12),
+    axis.text.x = element_text(size = 12, angle = 45, hjust = 1),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.major.y = element_line(size = 0.5),
+    panel.border = element_blank(),
+    panel.background = element_rect(fill = "#faecd5", color = NA),  # Light blue background for plot area
+    plot.background = element_rect(fill = "#faecd5", color = NA),   # Light blue background for overall plot
+    plot.title = element_text(size = 14, color = "#603601", hjust = -0.1, vjust = 1.5)  # Smaller title
+  ) +
+  scale_x_discrete(labels = month.abb) +
+  ggtitle("Bikes Stolen") +  # Add title for Bikes Stolen
+  geom_text(data = yearly_totals, aes(x = 12.5, y = OCC_YEAR, label = Stolen_Total), 
+            color = "#603601", hjust = 1, size = 3, inherit.aes = FALSE)
+
+# Combine the plots side by side
+combined_plot <- plot_grid(plot_found, plot_stolen, nrow = 1)
+
+# Display the combined plot
+combined_plot
 
 ```
 
@@ -248,7 +272,7 @@ Discuss any available data on bike types, brands, or values, showing if certain 
 
 # A Decade of Disappearing Bikes: Tracing Theft Trends Over Ten Years
 
-```{r animated_bar_plot, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=7, fig.height=4}
+```{r animated_bar_plot, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=7, fig.height=4.5}
 # Libraries
 library(ggplot2)
 library(gganimate)
@@ -296,8 +320,8 @@ ggplot(animated_data, aes(x=Offence_Category, y=Number_of_Offences, fill=Offence
   
   # Set background colors for panel and plot
   theme(
-    panel.background = element_rect(fill = "#f0f8ff", color = NA),
-    plot.background = element_rect(fill = "#f0f8ff", color = NA)
+    panel.background = element_rect(fill = "#faecd5", color = NA),
+    plot.background = element_rect(fill = "#faecd5", color = NA)
   ) +
   
   # gganimate specific settings for smooth transition
@@ -345,8 +369,8 @@ plot <- data %>%
   theme_ipsum() +
   theme(
     axis.text.x = element_text(angle = 45, hjust = 1),
-    panel.background = element_rect(fill = "#f0f8ff", color = NA),
-    plot.background = element_rect(fill = "#f0f8ff", color = NA)
+    panel.background = element_rect(fill = "#faecd5", color = NA),
+    plot.background = element_rect(fill = "#faecd5", color = NA)
   ) +
   transition_reveal(OCC_MONTH_NUM) +
   labs(color = "Year")
@@ -374,3 +398,45 @@ General tips:
  
  - after every visualizations talk a bit about the visualization itself, key points, make sure the story that we are talking about is proved by this visualization so each plot make sense (for example in 2016 there is a peak in May illustrated by the visualization, why? find relevant news and articels to explain it and cite), 用更descriptive的形式去explain 你的visualization plot with proves. 
  
+Map
+```{r, include = TRUE, warning = FALSE, message = FALSE}
+# Load cleaned coordinates data
+coordinates_data <- read.csv(here("data/cleaned_coordinates_data.csv"))
+
+# Get bounding box for Toronto (approximate limits for Toronto)
+toronto_bbox <- c(-79.6303856025883, 43.5822069220627, -79.1180336515019, 43.8554571861712)
+
+# Fetch map data from OpenStreetMap (OSM)
+toronto_map <- opq(bbox = toronto_bbox) %>%
+  add_osm_feature(key = "highway", value = "primary") %>%
+  add_osm_feature(key = 'highway', value = 'secondary') %>%
+  add_osm_feature(key = 'highway', value = 'tertiary') %>%
+  add_osm_feature(key = 'highway', value = 'residential') %>%
+  osmdata_sf()
+
+# Convert map data to Simple Features (sf) objects
+streets <- toronto_map$osm_lines
+
+# Plot the map with bike theft locations data
+ggplot() +
+  geom_sf(data = streets, color = "gray", size = 0.3, alpha = 0.6) + # OSM street map layer
+  geom_point(
+    data = coordinates_data, aes(x = longitude, y = latitude),
+    size = 0.5, color = "red"
+  ) + # Bike theft points
+  labs(
+    title = "Map of Bicycle Theft Locations in Toronto",
+    x = "Longitude", y = "Latitude"
+  ) +
+  coord_sf(
+    xlim = c(-79.6303856025883, -79.1180336515019),
+    ylim = c(43.5822069220627, 43.8554571861712), expand = FALSE
+  ) +
+  theme_minimal() +
+  theme(
+    panel.background = element_blank(), # Remove panel background
+    panel.grid.major = element_blank(), # Remove major grid lines
+    panel.grid.minor = element_blank(), # Remove minor grid lines
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+```
