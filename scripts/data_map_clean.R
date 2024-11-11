@@ -16,7 +16,8 @@ raw_data <- read_csv(here("data", "Bicycle_Thefts_Open_Data.csv"))
 
 # Select only the specified columns and rename them
 cleaned_data <- raw_data %>%
-  select(hood_num = HOOD_158, longitude = LONG_WGS84, latitude = LAT_WGS84)
+  select(hood_num = HOOD_158, longitude = LONG_WGS84, latitude = LAT_WGS84) %>%
+  filter(hood_num != "NSA")
 
 # Save the cleaned dataset
 write_csv(cleaned_data, here("data", "map_by_neighbourhoods_data.csv"))

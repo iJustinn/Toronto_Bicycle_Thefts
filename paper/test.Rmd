@@ -1,0 +1,147 @@
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+#### Map with Markers ####
+
+# Load necessary libraries
+library(dplyr)         # Provides functions for data manipulation.
+library(leaflet)       # Enables interactive maps.
+library(purrr)         # Contains functional programming tools, used here to walk through data.
+library(readr)         # Provides functions to read rectangular data like CSV files.
+library(here)          # Helps manage file paths in a more robust way.
+
+# Load your dataset (adjust the file path accordingly)
+map_data <- read_csv(here("data", "map_by_neighbourhoods_data.csv"), show_col_types = FALSE)
+# Loads the CSV file from the specified path using the 'here()' function for consistent path management.
+# 'show_col_types = FALSE' suppresses messages about the data types of each column.
+
+# Create a new column 'magnitude' that counts the total number of occurrences for each value in 'hood_num'
+map_data <- map_data %>% 
+  group_by(hood_num) %>%       # Groups the data by 'hood_num'.
+  mutate(magnitude = n()) %>%  # Adds a 'magnitude' column, which counts the number of rows in each group.
+  ungroup()                    # Ungroups the data, making it ready for further manipulations.
+
+# Modify the data frame, categorizing magnitude column
+map_data <- map_data %>% 
+  mutate(
+    mag.level = cut(magnitude, c(100, 500, 1000, 1500),
+                    labels = c('> 100 & <=500', '>500 & <=1000', '>1000 & <=1500'))
+    # Creates a 'mag.level' column that categorizes 'magnitude' into three levels based on specified ranges.
+  ) %>%
+  split(.$mag.level)  # Splits the dataset into a list of data frames by 'mag.level'.
+
+# Initialize the leaflet map
+l <- leaflet() %>%
+  addProviderTiles(providers$Esri.OceanBasemap)
+# Initializes a Leaflet map object and adds a base tile layer from the Esri Ocean Basemap provider.
+
+# Add the markers to the map for each magnitude level
+names(map_data) %>%
+  walk(function(df) {
+    l <<- l %>% 
+      addMarkers(
+        data = map_data[[df]], lng = ~longitude, lat = ~latitude,
+        label = ~as.character(magnitude), popup = ~as.character(magnitude),
+        group = df,
+        clusterOptions = markerClusterOptions()
+      )
+  })
+# Iterates over the names of the 'map_data' list (which are the different 'mag.level' categories).
+# For each category, it adds markers to the map:
+# - `data = map_data[[df]]`: Uses the split data for the current magnitude level.
+# - `lng = ~longitude, lat = ~latitude`: Sets longitude and latitude for marker placement.
+# - `label` and `popup`: Display the 'magnitude' value when markers are clicked or hovered over.
+# - `group = df`: Groups the markers by 'mag.level'.
+# - `clusterOptions = markerClusterOptions()`: Enables clustering of markers for better visualization.
+
+# Add layer controls and a minimap
+l <- l %>%
+  addLayersControl(
+    overlayGroups = names(map_data),
+    options = layersControlOptions(collapsed = FALSE)
+  ) %>%
+  addMiniMap(tiles = providers$Esri.OceanBasemap, width = 120, height = 80)
+# Adds layer controls to allow switching between different 'mag.level' categories on the map.
+# Adds a minimap showing a small overview of the area using the Esri Ocean Basemap.
+
+# Display the Map
+l
+```
+
+
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+#### Map with Areas ####
+
+# Load necessary libraries
+library(dplyr)
+library(readr)
+library(ggplot2)
+library(plotly)
+library(sf)
+library(crosstalk)
+library(here)
+library(osmdata)
+
+# Load your dataset (adjust the file path accordingly)
+map_data <- read_csv(here("data", "map_by_neighbourhoods_data.csv"), show_col_types = FALSE)
+
+# Create a new column 'magnitude' that counts the total number of occurrences for each value in 'hood_num'
+map_data <- map_data %>% 
+  group_by(hood_num) %>% 
+  summarise(
+    magnitude = n(),
+    longitude = mean(longitude),
+    latitude = mean(latitude)
+  ) %>% 
+  ungroup()
+
+# Get bounding box for Toronto (approximate limits for Toronto)
+toronto_bbox <- c(-79.6303856025883, 43.5822069220627, -79.1180336515019, 43.8554571861712)
+
+# Fetch map data from OpenStreetMap (OSM)
+toronto_map <- opq(bbox = toronto_bbox) %>%
+  add_osm_feature(key = "highway", value = "primary") %>%
+  add_osm_feature(key = "highway", value = "secondary") %>%
+  add_osm_feature(key = "highway", value = "tertiary") %>%
+  add_osm_feature(key = "highway", value = "residential") %>%
+  osmdata_sf()
+
+# Convert map data to Simple Features (sf) objects
+streets <- toronto_map$osm_lines
+
+# Generate a similar plot using ggplot2 and plotly
+shared_data <- crosstalk::SharedData$new(map_data)
+
+# Create ggplot object with the dataset and Toronto map as a background
+ggplot_map <- ggplot() +
+  geom_sf(data = streets, color = "gray", size = 0.3, alpha = 0.6) +  # Add OSM street map layer
+  geom_point(data = shared_data, aes(x = longitude, y = latitude, color = magnitude, size = magnitude)) +
+  coord_sf(
+    xlim = c(-79.6303856025883, -79.1180336515019),
+    ylim = c(43.5822069220627, 43.8554571861712), expand = FALSE
+  ) +
+  theme_minimal() +
+  labs(title = "Toronto Neighbourhood Data", x = "Longitude", y = "Latitude") +
+  theme(
+    panel.background = element_blank(),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+
+# Convert ggplot object to interactive plotly object
+plotly_map <- ggplotly(ggplot_map) %>%
+  highlight(
+    on = "plotly_hover",
+    off = "plotly_doubleclick",
+    selected = attrs_selected(line = list(color = "black"))
+  )
+
+# Display the interactive plotly map
+plotly_map
+```
+
+
+
+
+
+
