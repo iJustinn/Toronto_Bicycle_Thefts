@@ -17,13 +17,19 @@ thanks: "Code and data are available at: [https://github.com/iJustinn/Toronto_Bi
 }
 
 .title {
-  font-size: 70px;            /* Larger font size for the main title */
-  font-weight: bold;          /* Bold font weight for emphasis */
-  color: #FFC107;             /* Yellow color similar to the example */
-  text-align: left;           /* Align text to the left */
-  font-family: Georgia, serif; /* Use Georgia or a similar serif font */
+  font-size: 70px;                   /* Larger font size for the main title */
+  font-weight: bold;                 /* Bold font weight for emphasis */
+  color: #FFC107;                    /* Yellow color similar to the example */
+  text-align: left;                  /* Align text to the left */
+  font-family: Georgia, serif;       /* Use Georgia or a similar serif font */
   margin: 0;
-  line-height: 1.1;           /* Tighter line height */
+  line-height: 1.1;                  /* Tighter line height */
+  padding: 10px;                     /* Add padding around text */
+  border: 5px solid #FFC107;         /* Border around the title text */
+  border-radius: 8px;                /* Rounded corners for a softer look */
+  display: inline-block;             /* Keeps the border tight around text */
+  text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.7); /* Text shadow for emphasis */
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5); /* Optional shadow for depth */
 }
 
 .subtitle {
@@ -34,6 +40,7 @@ thanks: "Code and data are available at: [https://github.com/iJustinn/Toronto_Bi
   font-family: 'Times New Roman', Times, serif; /* A serif font for contrast */
   margin-top: 10px;
   line-height: 1.2;           /* Adjust line height for spacing */
+  text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.7); /* Text shadow for emphasis */
 }
 
 .description {
@@ -50,6 +57,7 @@ thanks: "Code and data are available at: [https://github.com/iJustinn/Toronto_Bi
   border: none !important;
   padding: 0 !important;
   box-shadow: none !important;
+  text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.7); /* Text shadow for emphasis */
 }
 
 .author-date {
@@ -59,6 +67,7 @@ thanks: "Code and data are available at: [https://github.com/iJustinn/Toronto_Bi
   text-align: left;
   margin-top: 30px;
   font-style: italic;
+  text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.7); /* Text shadow for emphasis */
 }
 
 .main-body {
