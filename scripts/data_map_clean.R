@@ -64,10 +64,10 @@ cleaned_data_2 <- cleaned_data %>%
       hood_num %in% downtown_toronto ~ "Downtown Toronto",
       hood_num %in% etobicoke ~ "Etobicoke",
       hood_num %in% york ~ "York",
-      hood_num %in% east_york ~ "East York",
-      TRUE ~ "Others"
+      hood_num %in% east_york ~ "East York"
     )
   ) %>%
+  filter(area_name != "Others") %>%
   group_by(area_num, area_name) %>%
   summarize(
     longitude = mean(longitude, na.rm = TRUE),
@@ -76,15 +76,8 @@ cleaned_data_2 <- cleaned_data %>%
     .groups = 'drop'
   )
 
-cleaned_data_2 <- cleaned_data_2 %>%
-  mutate(
-    latitude = if_else(area_name == "Others", 43.8, latitude),
-    longitude = if_else(area_name == "Others", -79.4, longitude)
-  )
-
 # Save summarized data
 write_csv(cleaned_data_2, here("data", "map_by_area_data.csv"))
-
 
 
 
