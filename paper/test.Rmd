@@ -13,18 +13,12 @@ map_data <- read_csv(here("data", "map_by_neighbourhoods_data.csv"), show_col_ty
 # Loads the CSV file from the specified path using the 'here()' function for consistent path management.
 # 'show_col_types = FALSE' suppresses messages about the data types of each column.
 
-# Create a new column 'magnitude' that counts the total number of occurrences for each value in 'hood_num'
-map_data <- map_data %>% 
-  group_by(hood_num) %>%       # Groups the data by 'hood_num'.
-  mutate(magnitude = n()) %>%  # Adds a 'magnitude' column, which counts the number of rows in each group.
-  ungroup()                    # Ungroups the data, making it ready for further manipulations.
-
-# Modify the data frame, categorizing magnitude column
+# Modify the data frame, categorizing case_num column
 map_data <- map_data %>% 
   mutate(
-    mag.level = cut(magnitude, c(100, 500, 1000, 1500),
+    mag.level = cut(case_num, c(100, 500, 1000, 1500),
                     labels = c('> 100 & <=500', '>500 & <=1000', '>1000 & <=1500'))
-    # Creates a 'mag.level' column that categorizes 'magnitude' into three levels based on specified ranges.
+    # Creates a 'mag.level' column that categorizes 'case_num' into three levels based on specified ranges.
   ) %>%
   split(.$mag.level)  # Splits the dataset into a list of data frames by 'mag.level'.
 
@@ -33,22 +27,30 @@ l <- leaflet() %>%
   addProviderTiles(providers$Esri.OceanBasemap)
 # Initializes a Leaflet map object and adds a base tile layer from the Esri Ocean Basemap provider.
 
-# Add the markers to the map for each magnitude level
+# Add the markers to the map for each case_num level
 names(map_data) %>%
   walk(function(df) {
     l <<- l %>% 
       addMarkers(
         data = map_data[[df]], lng = ~longitude, lat = ~latitude,
-        label = ~as.character(magnitude), popup = ~as.character(magnitude),
+        label = ~paste0("Hood: ", hood_name, " | Stolen Place: ", stolen_place, " | Cost: ", cost, " | Status: ", status),
+        popup = ~paste0(
+          "Hood: ", hood_name, "<br>",
+          "Stolen Place: ", stolen_place, "<br>",
+          "Cost: ", cost, "<br>",
+          "Status: ", status, "<br>",
+          "Case in area: ", case_num
+        ),
         group = df,
         clusterOptions = markerClusterOptions()
       )
   })
 # Iterates over the names of the 'map_data' list (which are the different 'mag.level' categories).
 # For each category, it adds markers to the map:
-# - `data = map_data[[df]]`: Uses the split data for the current magnitude level.
+# - `data = map_data[[df]]`: Uses the split data for the current case_num level.
 # - `lng = ~longitude, lat = ~latitude`: Sets longitude and latitude for marker placement.
-# - `label` and `popup`: Display the 'magnitude' value when markers are clicked or hovered over.
+# - `label`: Displays the 'case_num' value when markers are hovered over.
+# - `popup`: Displays additional information (hood_num, stolen_place, cost, status, and case_num) when a marker is clicked.
 # - `group = df`: Groups the markers by 'mag.level'.
 # - `clusterOptions = markerClusterOptions()`: Enables clustering of markers for better visualization.
 
@@ -82,27 +84,18 @@ library(here)
 library(osmdata)
 
 # Load your dataset (adjust the file path accordingly)
-map_data <- read_csv(here("data", "map_by_neighbourhoods_data.csv"), show_col_types = FALSE)
-
-# Create a new column 'magnitude' that counts the total number of occurrences for each value in 'hood_num'
-map_data <- map_data %>% 
-  group_by(hood_num) %>% 
-  summarise(
-    magnitude = n(),
-    longitude = mean(longitude),
-    latitude = mean(latitude)
-  ) %>% 
-  ungroup()
+map_data <- read_csv(here("data", "map_by_area_data.csv"), show_col_types = FALSE)
 
 # Get bounding box for Toronto (approximate limits for Toronto)
 toronto_bbox <- c(-79.6303856025883, 43.5822069220627, -79.1180336515019, 43.8554571861712)
 
 # Fetch map data from OpenStreetMap (OSM)
 toronto_map <- opq(bbox = toronto_bbox) %>%
-  add_osm_feature(key = "highway", value = "primary") %>%
-  add_osm_feature(key = "highway", value = "secondary") %>%
-  add_osm_feature(key = "highway", value = "tertiary") %>%
-  add_osm_feature(key = "highway", value = "residential") %>%
+  add_osm_feature(key = "boundary", value = "administrative") %>%
+#  add_osm_feature(key = "highway", value = "primary") %>%
+#  add_osm_feature(key = "highway", value = "secondary") %>%
+#  add_osm_feature(key = "highway", value = "tertiary") %>%
+#  add_osm_feature(key = "highway", value = "residential") %>%
   osmdata_sf()
 
 # Convert map data to Simple Features (sf) objects
@@ -113,23 +106,25 @@ shared_data <- crosstalk::SharedData$new(map_data)
 
 # Create ggplot object with the dataset and Toronto map as a background
 ggplot_map <- ggplot() +
-  geom_sf(data = streets, color = "gray", size = 0.3, alpha = 0.6) +  # Add OSM street map layer
-  geom_point(data = shared_data, aes(x = longitude, y = latitude, color = magnitude, size = magnitude)) +
+  geom_sf(data = streets, color = "lightgray", size = 0.3, alpha = 0.6) +  # Add OSM street map layer
+  geom_point(data = shared_data, aes(x = longitude, y = latitude, color = case_num, size = case_num, 
+                                     text = paste("Total Cases: ", case_num, " | Area Name: ", area_name))) +
   coord_sf(
     xlim = c(-79.6303856025883, -79.1180336515019),
     ylim = c(43.5822069220627, 43.8554571861712), expand = FALSE
   ) +
   theme_minimal() +
-  labs(title = "Toronto Neighbourhood Data", x = "Longitude", y = "Latitude") +
+  labs(title = "Toronto Neighbourhood Data by Area", x = "Longitude", y = "Latitude", color = "Number of Cases", size = "Total Cases") +
   theme(
     panel.background = element_blank(),
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank(),
     axis.text.x = element_text(angle = 45, hjust = 1)
-  )
+  ) +
+  scale_color_continuous(labels = scales::comma)
 
 # Convert ggplot object to interactive plotly object
-plotly_map <- ggplotly(ggplot_map) %>%
+plotly_map <- ggplotly(ggplot_map, tooltip = "text") %>%
   highlight(
     on = "plotly_hover",
     off = "plotly_doubleclick",
@@ -139,8 +134,6 @@ plotly_map <- ggplotly(ggplot_map) %>%
 # Display the interactive plotly map
 plotly_map
 ```
-
-
 
 
 
