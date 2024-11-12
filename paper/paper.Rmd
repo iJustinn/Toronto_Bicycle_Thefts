@@ -139,42 +139,33 @@ thanks: "Code and data are available at: [https://github.com/iJustinn/Toronto_Bi
 ```{r, include = FALSE, warning = FALSE, message = FALSE}
 knitr::opts_chunk$set(echo = FALSE, include=TRUE, eval=TRUE)
 
-required_packages <- c("lubridate", "sf", "tidyverse", "readr", "here", "osmdata", "ggplot2")
+required_packages <- c("sf", "here", "dplyr", "readr", "purrr", "plotly", "ggplot2", "leaflet", "osmdata", 
+                       "ggridges", "cowplot", "lubridate", "tidyverse", "crosstalk", "bookdown", "hrbrthemes", "gganimate")
+
 for (p in required_packages) {
   if (!require(p, character.only = TRUE)) {
     install.packages(p, character.only = TRUE)
   }
 }
 
+library(sf)
+library(here)
+library(dplyr)
+library(readr)
+library(purrr)
+library(plotly)
+library(ggplot2)
+library(leaflet)
+library(osmdata)
+library(cowplot)
+library(ggridges)
+library(bookdown)
 library(lubridate)
 library(tidyverse)
-library(ggplot2)
-library(osmdata)
-library(readr)
-library(here)
-library(sf)
+library(crosstalk)
+library(gganimate)
+library(hrbrthemes)
 
-# you are welcome to use either the CSV file or the GeoJSON file
-# GeoJSON format maybe useful if you would like to combine
-# an external geospatial dataset
-bike_thefts_csv <- read_csv(here("data/clean_data.csv")) |>
-  mutate(
-    occurence_date = as_date(
-      OCC_DATE, format = "%a, %d %b %Y %H:%M:%S GMT"
-    ),
-    report_date = as_date(
-      REPORT_DATE, format = "%a, %d %b %Y %H:%M:%S GMT"
-    )
-  )
-bike_thefts_sf <- read_sf(here("data/Bicycle_Thefts_Open_Data.geojson")) |>
-  mutate(
-    occurence_date = as_date(
-      OCC_DATE, format = "%a, %d %b %Y %H:%M:%S GMT"
-    ),
-    report_date = as_date(
-      REPORT_DATE, format = "%a, %d %b %Y %H:%M:%S GMT"
-    )
-  )
 ```
 
 <div class="section-heading">
@@ -184,11 +175,6 @@ bike_thefts_sf <- read_sf(here("data/Bicycle_Thefts_Open_Data.geojson")) |>
 
 <center>
 ```{r interactive_weekly_plot, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=9.5, fig.height=4}
-
-library(plotly)
-library(readr)
-library(dplyr)
-library(here)
 
 # Load the data
 data <- read_csv(here("data", "Theft_Counts_By_Day.csv"), show_col_types = FALSE)
@@ -200,7 +186,7 @@ data <- data %>%
 
 # Initialize plot with a line trace for the entire data
 fig <- plot_ly(data, x = ~OCC_DOW, y = ~Number_of_Thefts, type = 'scatter', mode = 'lines+markers',
-               line = list(color = 'brown'), marker = list(color = 'blue', size = 8))
+               line = list(color = '#05595B'), marker = list(color = '#603601', size = 10))
 
 # Add points for each day with initial visibility settings
 for (i in 1:nrow(data)) {
@@ -212,7 +198,7 @@ for (i in 1:nrow(data)) {
       mode = 'markers+text',
       text = paste("Thefts:", data$Number_of_Thefts[i]),
       textposition = "top center",
-      marker = list(color = "yellow", size = 10),
+      marker = list(color = "#FFC107", size = 15),
       showlegend = FALSE,
       visible = ifelse(i == 1, TRUE, FALSE)
     )
@@ -258,22 +244,16 @@ fig <- fig %>%
 # Display the plot
 fig
 
-
 ``` 
 </center>
 
 <div class="main-body">
-  <p> Weekly bicycle theft patterns in Toronto is illustrated in @interactive_weekly_plot, revealing that thefts are not evenly distributed throughout the week. The data shows a peak on Fridays, with over <strong style="color: #FFC107;">4,900</strong> reported thefts, followed by a decline on Saturday and Sunday. This trend may reflect how people use their bikes during the week versus the weekend. Fridays might represent a combination of commuter bike usage and weekend planning, where people may leave their bikes in high-traffic or less secure areas, making them more vulnerable to theft.</p>
+  <p> Weekly bicycle theft patterns in Toronto is illustrated in \@ref(fig:interactive_weekly_plot), revealing that thefts are not evenly distributed throughout the week. The data shows a peak on Fridays, with over <strong style="color: #FFC107;">4,900</strong> reported thefts, followed by a decline on Saturday and Sunday. This trend may reflect how people use their bikes during the week versus the weekend. Fridays might represent a combination of commuter bike usage and weekend planning, where people may leave their bikes in high-traffic or less secure areas, making them more vulnerable to theft.</p>
 
 <p>This insight could be valuable for both cyclists and advocacy groups like <a href="https://www.cycleto.ca/" target="_blank" style="color: #FFC107; text-decoration: underline;">Cycle Toronto</a>. Understanding that Friday is a peak day for thefts, local authorities could consider increasing surveillance or public awareness efforts on this day, especially in known hotspot areas. Additionally, for cyclists, it suggests that extra caution on Fridays could reduce the risk of theft. The data here underscores the importance of timing in bike theft prevention, showing how risks fluctuate within the week, which may reflect broader social and behavioral patterns around work and leisure in Toronto.</p>\ 
 
 <center>
 ```{r mothly_plot, include = TRUE, warning = FALSE, message = FALSE, fig.width=9.5, fig.height=5}
-# Load necessary libraries
-library(tidyverse)
-library(ggridges)
-library(cowplot)
-library(here)
 
 # Load your data
 data <- read_csv(here("data", "Theft_and_Found_Counts_By_Month_2014_2024.csv"), show_col_types = FALSE)
@@ -365,6 +345,11 @@ combined_plot
   <span class="section-title-line2">Analyzing Theft by Bicycle Type and Value</span>
 </div>
 
+```{r}
+
+```
+
+
 Discuss any available data on bike types, brands, or values, showing if certain bikes are more vulnerable to theft than others.
 
 <div class="section-heading">
@@ -374,12 +359,6 @@ Discuss any available data on bike types, brands, or values, showing if certain 
 
 <center>
 ```{r animated_bar_plot, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=4.5, fig.height=2.3}
-# Libraries
-library(ggplot2)
-library(gganimate)
-library(readr)
-library(here)
-library(dplyr)
 
 # Load the data
 data <- read_csv(here("data", "Stolen_Found_Counts.csv"), show_col_types = FALSE)
@@ -458,13 +437,6 @@ ggplot(animated_data, aes(x = Offence_Category, y = Number_of_Offences, fill = O
 
 <center>
 ```{r animated_line_plot, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=5, fig.height=3}
-# Load necessary libraries
-library(ggplot2)
-library(gganimate)
-library(dplyr)
-library(hrbrthemes)
-library(readr)
-library(here)
 
 # Load your data
 data <- read_csv(here("data", "Bicycle_Theft_Monthly_Counts.csv"), show_col_types = FALSE)
@@ -513,7 +485,7 @@ animate(plot, nframes = 100, fps = 10)
 
 @animated_line_plot illustrates the monthly patterns of bicycle thefts in Toronto from 2014 to mid-2024, revealing a clear seasonal trend. Each year, bike thefts rise steadily in the spring, peak during the summer months of June and July, and then decline in the fall and winter when cycling activity decreases. This predictable pattern aligns with Toronto's warmer months when more residents choose biking as their primary mode of transportation or recreation, leading to increased exposure of bikes in public spaces. These high-theft months underline the need for heightened security measures and awareness among cyclists, particularly during summer.
 
-The year 2020, however, deviates from this regular trend due to the impact of the COVID-19 pandemic. As public transit options were considered risky, many Torontonians turned to bicycles as a safer and more flexible transportation option, resulting in a rise in bike ownership and driving up theft rates (@citeshapiro2021). Additionally, the pandemic stretched police resources, potentially limiting routine patrols and recovery efforts. The 2020 increase highlights how external factors, such as a public health crisis, can exacerbate bike theft trends and points to the importance of adaptable theft prevention strategies in response to changing urban transportation needs.
+The year 2020, however, deviates from this regular trend due to the impact of the COVID-19 pandemic. As public transit options were considered risky, many Torontonians turned to bicycles as a safer and more flexible transportation option, resulting in a rise in bike ownership and driving up theft rates (@citeShapiro2021). Additionally, the pandemic stretched police resources, potentially limiting routine patrols and recovery efforts. The 2020 increase highlights how external factors, such as a public health crisis, can exacerbate bike theft trends and points to the importance of adaptable theft prevention strategies in response to changing urban transportation needs.
 
 <div class="section-heading">
   <span class="section-title-line1">Mapping the Danger Zones:</span><br>
@@ -527,31 +499,20 @@ The year 2020, however, deviates from this regular trend due to the impact of th
 ```{r interactive_map, echo=FALSE, warning=FALSE, message=FALSE}
 #### Map with Markers ####
 
-# Load necessary libraries
-library(dplyr)         # Provides functions for data manipulation.
-library(leaflet)       # Enables interactive maps.
-library(purrr)         # Contains functional programming tools, used here to walk through data.
-library(readr)         # Provides functions to read rectangular data like CSV files.
-library(here)          # Helps manage file paths in a more robust way.
-
-# Load your dataset (adjust the file path accordingly)
+# Load your dataset
 map_data <- read_csv(here("data", "map_by_neighbourhoods_data.csv"), show_col_types = FALSE)
-# Loads the CSV file from the specified path using the 'here()' function for consistent path management.
-# 'show_col_types = FALSE' suppresses messages about the data types of each column.
 
 # Modify the data frame, categorizing case_num column
 map_data <- map_data %>% 
   mutate(
     mag.level = cut(case_num, c(100, 500, 1000, 1500),
                     labels = c('> 100 & <=500', '>500 & <=1000', '>1000 & <=1500'))
-    # Creates a 'mag.level' column that categorizes 'case_num' into three levels based on specified ranges.
   ) %>%
-  split(.$mag.level)  # Splits the dataset into a list of data frames by 'mag.level'.
+  split(.$mag.level)
 
 # Initialize the leaflet map
 l <- leaflet() %>%
   addProviderTiles(providers$Esri.OceanBasemap)
-# Initializes a Leaflet map object and adds a base tile layer from the Esri Ocean Basemap provider.
 
 # Add the markers to the map for each case_num level
 names(map_data) %>%
@@ -571,14 +532,6 @@ names(map_data) %>%
         clusterOptions = markerClusterOptions()
       )
   })
-# Iterates over the names of the 'map_data' list (which are the different 'mag.level' categories).
-# For each category, it adds markers to the map:
-# - `data = map_data[[df]]`: Uses the split data for the current case_num level.
-# - `lng = ~longitude, lat = ~latitude`: Sets longitude and latitude for marker placement.
-# - `label`: Displays the 'case_num' value when markers are hovered over.
-# - `popup`: Displays additional information (hood_num, stolen_place, cost, status, and case_num) when a marker is clicked.
-# - `group = df`: Groups the markers by 'mag.level'.
-# - `clusterOptions = markerClusterOptions()`: Enables clustering of markers for better visualization.
 
 # Add layer controls and a minimap
 l <- l %>%
@@ -587,11 +540,10 @@ l <- l %>%
     options = layersControlOptions(collapsed = FALSE)
   ) %>%
   addMiniMap(tiles = providers$Esri.OceanBasemap, width = 120, height = 80)
-# Adds layer controls to allow switching between different 'mag.level' categories on the map.
-# Adds a minimap showing a small overview of the area using the Esri Ocean Basemap.
 
 # Display the Map
 l
+
 ```
 </center>
 
@@ -604,11 +556,6 @@ l
 
 <center>
 ```{r map_of_stolen_bike, echo=FALSE, warning=FALSE, message=FALSE}
-# Load necessary libraries
-library(ggplot2)
-library(sf)
-library(osmdata)
-library(here)
 
 # Load cleaned coordinates data
 coordinates_data <- read.csv(here("data/cleaned_coordinates_data.csv"))
@@ -632,7 +579,7 @@ bike_theft_plot <- ggplot() +
   geom_sf(data = streets, color = "gray", size = 0.3, alpha = 0.6) + # OSM street map layer
   geom_point(
     data = coordinates_data, aes(x = longitude, y = latitude),
-    size = 0.5, color = "red"
+    size = 0.5, color = "#FFC107"
   ) + # Bike theft points
   labs(
     title = "Map of Stolen Bike Cases in Toronto",
@@ -651,6 +598,7 @@ bike_theft_plot <- ggplot() +
   )
 
 bike_theft_plot
+
 ```
 </center>
 
@@ -664,16 +612,6 @@ bike_theft_plot
 <center>
 ```{r map_case_number, echo=FALSE, warning=FALSE, message=FALSE}
 #### Map with Areas ####
-
-# Load necessary libraries
-library(dplyr)
-library(readr)
-library(ggplot2)
-library(plotly)
-library(sf)
-library(crosstalk)
-library(here)
-library(osmdata)
 
 # Load your dataset (adjust the file path accordingly)
 map_data <- read_csv(here("data", "map_by_area_data.csv"), show_col_types = FALSE)
@@ -692,6 +630,13 @@ streets <- toronto_map$osm_lines
 # Generate a similar plot using ggplot2 and plotly
 shared_data <- crosstalk::SharedData$new(map_data)
 
+# Define more detailed breaks for color scale based on `case_num`
+max_case_num <- max(map_data$case_num, na.rm = TRUE)
+color_breaks <- seq(0, max_case_num, by = max_case_num / 4)
+
+# Create a rounding function to simplify the labels
+rounded_labels <- function(x) scales::comma(round(x, -6))
+
 # Create ggplot object with the dataset and Toronto map as a background
 ggplot_map <- ggplot() +
   geom_sf(data = streets, color = "lightgray", size = 0.3, alpha = 0.6) +  # Add OSM street map layer
@@ -709,8 +654,8 @@ ggplot_map <- ggplot() +
     panel.grid.minor = element_blank(),
     axis.text.x = element_text(angle = 45, hjust = 1)
   ) +
-  scale_color_continuous(labels = scales::comma) +
-  scale_size_continuous(range = c(3, 12)) # Adjust range values to control the size of points
+  scale_color_gradientn(colors = c("#603601", "#FFC107"), breaks = color_breaks, labels = rounded_labels) +
+  scale_size_continuous(range = c(3, 12))
 
 # Convert ggplot object to interactive plotly object
 plotly_map <- ggplotly(ggplot_map, tooltip = "text") %>%
