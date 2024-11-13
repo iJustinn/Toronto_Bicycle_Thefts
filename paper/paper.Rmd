@@ -755,7 +755,7 @@ plotly_map
 </div>
 
 <div class="main-body">
-  <p>In this analysis, we began by examining when bikes are at the greatest risk of theft, revealing a strong seasonal trend with thefts peaking in the summer months from May to August and notable decrease on Fridays. These insights provided a foundation for understanding the timing of bike thefts. Next, we looked into bike recovery rates, which showed a significant gap between the number of bikes stolen and those successfully recovered, highlighting the challenges in returning stolen bikes to their owners. This aspect underscored systemic issues in recovery efforts and the need for improved tracking systems.</p>
+  <p>In this analysis, we began by examining when bikes are at the greatest risk of theft, revealing a strong seasonal trend with thefts peaking in the summer months from May to August and notable increase on Fridays. These insights provided a foundation for understanding the timing of bike thefts. Next, we looked into bike recovery rates, which showed a significant gap between the number of bikes stolen and those successfully recovered, highlighting the challenges in returning stolen bikes to their owners. This aspect underscored systemic issues in recovery efforts and the need for improved tracking systems.</p>
 
 <p>The analysis also dove into geographical patterns, identifying hotspots such as downtown Toronto and major transit hubs where bike thefts are most concentrated. Through mapping, we provided a visual representation of high-risk areas, guiding cyclists and policymakers on where extra security measures are most needed.</p>
 
