@@ -1,0 +1,5 @@
+cost_tier,bike_num
+High ($1000 - $1999),7045
+Low (< $500),10684
+Medium ($500 - $999),11758
+Very High (>= $2000),4188

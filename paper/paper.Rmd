@@ -17,13 +17,19 @@ thanks: "Code and data are available at: [https://github.com/iJustinn/Toronto_Bi
 }
 
 .title {
-  font-size: 70px;            /* Larger font size for the main title */
-  font-weight: bold;          /* Bold font weight for emphasis */
-  color: #FFC107;             /* Yellow color similar to the example */
-  text-align: left;           /* Align text to the left */
-  font-family: Georgia, serif; /* Use Georgia or a similar serif font */
+  font-size: 70px;                   /* Larger font size for the main title */
+  font-weight: bold;                 /* Bold font weight for emphasis */
+  color: #FFC107;                    /* Yellow color similar to the example */
+  text-align: left;                  /* Align text to the left */
+  font-family: Georgia, serif;       /* Use Georgia or a similar serif font */
   margin: 0;
-  line-height: 1.1;           /* Tighter line height */
+  line-height: 1.1;                  /* Tighter line height */
+  padding: 10px;                     /* Add padding around text */
+  border: 5px solid #FFC107;         /* Border around the title text */
+  border-radius: 8px;                /* Rounded corners for a softer look */
+  display: inline-block;             /* Keeps the border tight around text */
+  text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.7); /* Text shadow for emphasis */
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5); /* Optional shadow for depth */
 }
 
 .subtitle {
@@ -34,6 +40,7 @@ thanks: "Code and data are available at: [https://github.com/iJustinn/Toronto_Bi
   font-family: 'Times New Roman', Times, serif; /* A serif font for contrast */
   margin-top: 10px;
   line-height: 1.2;           /* Adjust line height for spacing */
+  text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.7); /* Text shadow for emphasis */
 }
 
 .description {
@@ -50,6 +57,7 @@ thanks: "Code and data are available at: [https://github.com/iJustinn/Toronto_Bi
   border: none !important;
   padding: 0 !important;
   box-shadow: none !important;
+  text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.7); /* Text shadow for emphasis */
 }
 
 .author-date {
@@ -59,6 +67,7 @@ thanks: "Code and data are available at: [https://github.com/iJustinn/Toronto_Bi
   text-align: left;
   margin-top: 30px;
   font-style: italic;
+  text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.7); /* Text shadow for emphasis */
 }
 
 .main-body {
@@ -119,7 +128,7 @@ thanks: "Code and data are available at: [https://github.com/iJustinn/Toronto_Bi
 <div class="main-body">
   <p>Imagine locking up your bike on a bustling Toronto street, feeling reassured that a strong lock and some common sense will keep it safe. But what if certain seasons, specific bike types, or even certain neighborhoods increase your risk of theft far more than you realize? For many cyclists, bike theft has moved from a distant possibility to an everyday concern, with data revealing just how pervasive the risk can be in Toronto.</p>
 
-  <p>In this analysis, we dig into over a decade’s worth of data from the <a href="https://data.torontopolice.on.ca/datasets/TorontoPS::bicycle-thefts-open-data/about" target="_blank" style="color: #FFC107; text-decoration: underline;">Toronto Police Service</a> to answer key questions: When are bikes at the greatest risk? What makes a bike more likely to be targeted? And where are the theft hotspots cyclists should avoid? Each section of our article addresses a different angle of bike theft in Toronto, from seasonal and weekly theft patterns to variations by bicycle type and value, to pinpointing the city’s most high-risk locations.</p>
+  <p>In this analysis, we dig into over a decade’s worth of data from the <a href="https://data.torontopolice.on.ca/datasets/TorontoPS::bicycle-thefts-open-data/about" target="_blank" style="color: #FFC107; text-decoration: underline;">Toronto Police Service</a> (@citePolice) to answer key questions: When are bikes at the greatest risk? What makes a bike more likely to be targeted? And where are the theft hotspots cyclists should avoid? Each section of our article addresses a different angle of bike theft in Toronto, from seasonal and weekly theft patterns to variations by bicycle type and value, to pinpointing the city’s most high-risk locations.</p>
 
   <p>Over the past decade, <strong style="color: #FFC107;">32,489</strong> bike thefts have been reported in Toronto, yet only <strong style="color: #FFC107;">422</strong> of these stolen bikes were successfully recovered. With these insights, we aim to empower cyclists with knowledge that can help them safeguard their bikes and inform Cycle Toronto and local authorities about the areas most in need of intervention. Read on as we trace theft trends over the years, reveal the high-risk locations, and provide practical advice to help protect your bike.</p>
 </div>
@@ -130,42 +139,34 @@ thanks: "Code and data are available at: [https://github.com/iJustinn/Toronto_Bi
 ```{r, include = FALSE, warning = FALSE, message = FALSE}
 knitr::opts_chunk$set(echo = FALSE, include=TRUE, eval=TRUE)
 
-required_packages <- c("lubridate", "sf", "tidyverse", "readr", "here", "osmdata", "ggplot2")
+required_packages <- c("sf", "here", "dplyr", "readr", "purrr", "scales", "plotly", "ggplot2", "leaflet", "osmdata", 
+                       "ggridges", "cowplot", "lubridate", "tidyverse", "crosstalk", "bookdown", "hrbrthemes", "gganimate")
+
 for (p in required_packages) {
   if (!require(p, character.only = TRUE)) {
     install.packages(p, character.only = TRUE)
   }
 }
 
+library(sf)
+library(here)
+library(dplyr)
+library(readr)
+library(purrr)
+library(scales)
+library(plotly)
+library(ggplot2)
+library(leaflet)
+library(osmdata)
+library(cowplot)
+library(ggridges)
+library(bookdown)
 library(lubridate)
 library(tidyverse)
-library(ggplot2)
-library(osmdata)
-library(readr)
-library(here)
-library(sf)
+library(crosstalk)
+library(gganimate)
+library(hrbrthemes)
 
-# you are welcome to use either the CSV file or the GeoJSON file
-# GeoJSON format maybe useful if you would like to combine
-# an external geospatial dataset
-bike_thefts_csv <- read_csv(here("data/clean_data.csv")) |>
-  mutate(
-    occurence_date = as_date(
-      OCC_DATE, format = "%a, %d %b %Y %H:%M:%S GMT"
-    ),
-    report_date = as_date(
-      REPORT_DATE, format = "%a, %d %b %Y %H:%M:%S GMT"
-    )
-  )
-bike_thefts_sf <- read_sf(here("data/Bicycle_Thefts_Open_Data.geojson")) |>
-  mutate(
-    occurence_date = as_date(
-      OCC_DATE, format = "%a, %d %b %Y %H:%M:%S GMT"
-    ),
-    report_date = as_date(
-      REPORT_DATE, format = "%a, %d %b %Y %H:%M:%S GMT"
-    )
-  )
 ```
 
 <div class="section-heading">
@@ -175,11 +176,6 @@ bike_thefts_sf <- read_sf(here("data/Bicycle_Thefts_Open_Data.geojson")) |>
 
 <center>
 ```{r interactive_weekly_plot, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=9.5, fig.height=4}
-
-library(plotly)
-library(readr)
-library(dplyr)
-library(here)
 
 # Load the data
 data <- read_csv(here("data", "Theft_Counts_By_Day.csv"), show_col_types = FALSE)
@@ -191,7 +187,7 @@ data <- data %>%
 
 # Initialize plot with a line trace for the entire data
 fig <- plot_ly(data, x = ~OCC_DOW, y = ~Number_of_Thefts, type = 'scatter', mode = 'lines+markers',
-               line = list(color = 'brown'), marker = list(color = 'blue', size = 8))
+               line = list(color = '#05595B'), marker = list(color = '#603601', size = 10))
 
 # Add points for each day with initial visibility settings
 for (i in 1:nrow(data)) {
@@ -203,7 +199,7 @@ for (i in 1:nrow(data)) {
       mode = 'markers+text',
       text = paste("Thefts:", data$Number_of_Thefts[i]),
       textposition = "top center",
-      marker = list(color = "yellow", size = 10),
+      marker = list(color = "#FFC107", size = 15),
       showlegend = FALSE,
       visible = ifelse(i == 1, TRUE, FALSE)
     )
@@ -249,22 +245,16 @@ fig <- fig %>%
 # Display the plot
 fig
 
-
 ``` 
 </center>
 
 <div class="main-body">
-  <p> Weekly bicycle theft patterns in Toronto is illustrated in @interactive_weekly_plot, revealing that thefts are not evenly distributed throughout the week. The data shows a peak on Fridays, with over <strong style="color: #FFC107;">4,900</strong> reported thefts, followed by a decline on Saturday and Sunday. This trend may reflect how people use their bikes during the week versus the weekend. Fridays might represent a combination of commuter bike usage and weekend planning, where people may leave their bikes in high-traffic or less secure areas, making them more vulnerable to theft.</p>
+  <p> Weekly bicycle theft patterns in Toronto is illustrated in \@ref(fig:interactive_weekly_plot), revealing that thefts are not evenly distributed throughout the week. The data shows a peak on Fridays, with over <strong style="color: #FFC107;">4,900</strong> reported thefts, followed by a decline on Saturday and Sunday. This trend may reflect how people use their bikes during the week versus the weekend. Fridays might represent a combination of commuter bike usage and weekend planning, where people may leave their bikes in high-traffic or less secure areas, making them more vulnerable to theft.</p>
 
-<p>This insight could be valuable for both cyclists and advocacy groups like <a href="https://www.cycleto.ca/" target="_blank" style="color: #FFC107; text-decoration: underline;">Cycle Toronto</a>. Understanding that Friday is a peak day for thefts, local authorities could consider increasing surveillance or public awareness efforts on this day, especially in known hotspot areas. Additionally, for cyclists, it suggests that extra caution on Fridays could reduce the risk of theft. The data here underscores the importance of timing in bike theft prevention, showing how risks fluctuate within the week, which may reflect broader social and behavioral patterns around work and leisure in Toronto.</p>\ 
+<p>This insight could be valuable for both cyclists and advocacy groups like <a href="https://www.cycleto.ca/" target="_blank" style="color: #FFC107; text-decoration: underline;">Cycle Toronto</a> (@citeEndBikeTheft). Understanding that Friday is a peak day for thefts, local authorities could consider increasing surveillance or public awareness efforts on this day, especially in known hotspot areas. Additionally, for cyclists, it suggests that extra caution on Fridays could reduce the risk of theft. The data here underscores the importance of timing in bike theft prevention, showing how risks fluctuate within the week, which may reflect broader social and behavioral patterns around work and leisure in Toronto.</p>\ 
 
 <center>
 ```{r mothly_plot, include = TRUE, warning = FALSE, message = FALSE, fig.width=9.5, fig.height=5}
-# Load necessary libraries
-library(tidyverse)
-library(ggridges)
-library(cowplot)
-library(here)
 
 # Load your data
 data <- read_csv(here("data", "Theft_and_Found_Counts_By_Month_2014_2024.csv"), show_col_types = FALSE)
@@ -346,15 +336,96 @@ combined_plot
 \ 
 
 <div class="main-body">
-  <p>The visualization of bike theft and recovery patterns in Toronto @monthly_plot ussing data from 2014 to 2024 reveals a distinct seasonality, with thefts peaking during the warmer months from May to August. This trend likely correlates with <a href="https://www.toronto.ca/wp-content/uploads/2021/04/8f76-2019-Cycling-Public-Option-Survey-City-of-Toronto-Cycling.pdf" target="_blank" style="color: #FFC107; text-decoration: underline;">increase</a> cycling activity during the summer, when more people choose biking as a primary mode of transportation or recreation. Events like <a href="https://www.bikemonth.ca/toronto" target="_blank" style="color: #FFC107; text-decoration: underline;">Bike Month</a> in June, which includes initiatives encouraging cycling, leading to higher exposure of bikes, making them easier targets for theft.</p>
+  <p>The visualization of bike theft and recovery patterns in Toronto @monthly_plot ussing data from 2014 to 2024 reveals a distinct seasonality, with thefts peaking during the warmer months from May to August. This trend likely correlates with <a href="https://www.toronto.ca/wp-content/uploads/2021/04/8f76-2019-Cycling-Public-Option-Survey-City-of-Toronto-Cycling.pdf" target="_blank" style="color: #FFC107; text-decoration: underline;">increase</a> (@citeSurvey) cycling activity during the summer, when more people choose biking as a primary mode of transportation or recreation. Events like <a href="https://www.bikemonth.ca/toronto" target="_blank" style="color: #FFC107; text-decoration: underline;">Bike Month</a> (@citeBikeMonth) in June, which includes initiatives encouraging cycling, leading to higher exposure of bikes, making them easier targets for theft.</p>
 
-<p>In contrast, the left side of the plot illustrates the number of bikes found each month, which remains consistently low across the years. The low recovery rate highlights systemic issues in bike recovery efforts. Despite <a href="https://www.tps.ca/services/bicycle-registration/" target="_blank" style="color: #FFC107; text-decoration: underline;">city-wide bike registry programs</a> and <a href="https://www.tps.ca/crime-prevention/bicycle-safety-and-theft-prevention/" target="_blank" style="color: #FFC107; text-decoration: underline;">police campaigns</a> aimed at educating cyclists about secure parking and locking techniques, the ratio of bikes recovered to those stolen has remained low. In recent years, Toronto has initiated <a href="https://www.toronto.ca/services-payments/streets-parking-transportation/cycling-in-toronto/bicycle-parking/" style="color: #FFC107; text-decoration: underline;">programs</a> to improve bike parking infrastructure and introduced more secure lock stands in high-theft areas, but these measures appear insufficient given the scale of theft illustrated in this data.</p>
+<p>In contrast, the left side of the plot illustrates the number of bikes found each month, which remains consistently low across the years. The low recovery rate highlights systemic issues in bike recovery efforts. Despite <a href="https://www.tps.ca/services/bicycle-registration/" target="_blank" style="color: #FFC107; text-decoration: underline;">city-wide bike registry programs</a> (@citeTPSRegistration) and <a href="https://www.tps.ca/crime-prevention/bicycle-safety-and-theft-prevention/" target="_blank" style="color: #FFC107; text-decoration: underline;">police campaigns</a> (@citeTPSBicycleSafety) aimed at educating cyclists about secure parking and locking techniques, the ratio of bikes recovered to those stolen has remained low. In recent years, Toronto has initiated <a href="https://www.toronto.ca/services-payments/streets-parking-transportation/cycling-in-toronto/bicycle-parking/" style="color: #FFC107; text-decoration: underline;">programs</a> (@citeBicycleParking) to improve bike parking infrastructure and introduced more secure lock stands in high-theft areas, but these measures appear insufficient given the scale of theft illustrated in this data.</p>
 
 
 <div class="section-heading">
   <span class="section-title-line1">What Makes a Bike a Target?</span><br>
   <span class="section-title-line2">Analyzing Theft by Bicycle Type and Value</span>
 </div>
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+# Load the cleaned dataset
+bike_type_counts <- read_csv(here("data", "bike_type_counts.csv"))
+
+# Mapping bike type codes to descriptive names
+bike_type_names <- c(
+  "Others" = "Other Types",
+  "MT" = "Mountain",
+  "RG" = "Gravel",
+  "OT" = "Other",
+  "RC" = "Recreational & Commuting",
+  "EL" = "Electric"
+)
+
+# Calculate percentages for each bike type
+bike_type_counts <- bike_type_counts %>%
+  mutate(total = sum(bike_num)) %>%
+  group_by(bike_type) %>%
+  mutate(percentage = (bike_num / total) * 100)
+
+# Summarize types with less than 5% as "Others"
+bike_type_counts <- bike_type_counts %>%
+  mutate(bike_type = ifelse(percentage < 5, "Others", bike_type)) %>%
+  group_by(bike_type) %>%
+  summarise(bike_num = sum(bike_num), percentage = sum(percentage)) %>%
+  ungroup()
+
+# Reorder bike types by percentage in descending order
+bike_type_counts <- bike_type_counts %>%
+  mutate(bike_type = fct_reorder(bike_type, -percentage))
+
+# Create a horizontal stacked bar chart
+ggplot(bike_type_counts, aes(x = factor(1), y = percentage, fill = bike_type)) +
+  geom_bar(stat = "identity", position = "fill") +
+  geom_text(aes(label = paste0(round(percentage, 1), "%")), 
+            position = position_fill(vjust = 0.5), size = 3) +
+  scale_y_continuous(labels = percent_format()) +
+  labs(
+    title = "Distribution of Bike Types",
+    x = "Bike Types",
+    y = "Percentage",
+    fill = "Bike Types"
+  ) +
+scale_fill_manual(labels = bike_type_names, values = c("#FF7043", "#FF8F00", "#FFA726", "#FFB300", "#FFC107", "#FFCA28")) +  coord_flip() +
+  theme_minimal() +
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        legend.position = "right")
+
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+# Load data
+bike_cost_counts <- read_csv(here("data", "bike_cost_counts.csv"))
+
+# Create a pie chart of bike cost tiers
+ggplot(bike_cost_counts, aes(x = "", y = bike_num, fill = cost_tier)) +
+  geom_bar(width = 1, stat = "identity") +
+  coord_polar("y") +
+  labs(
+    title = "Proportion of Bike Cost Tiers",
+    fill = "Cost Tier"
+  ) +
+  scale_fill_manual(values = c("#FFCA28", "#FFC107", "#FFB300", "#FF8F00")) +  # Customize colors
+  theme_minimal() +
+  theme(
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    axis.text = element_blank(),
+    panel.grid = element_blank(),
+    plot.title = element_text(hjust = 0.5)
+  ) +
+  geom_text(aes(label = paste0(round(bike_num / sum(bike_num) * 100, 1), "%")),
+            position = position_stack(vjust = 0.5))
+
+```
+
+
 
 Discuss any available data on bike types, brands, or values, showing if certain bikes are more vulnerable to theft than others.
 
@@ -365,12 +436,6 @@ Discuss any available data on bike types, brands, or values, showing if certain 
 
 <center>
 ```{r animated_bar_plot, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=4.5, fig.height=2.3}
-# Libraries
-library(ggplot2)
-library(gganimate)
-library(readr)
-library(here)
-library(dplyr)
 
 # Load the data
 data <- read_csv(here("data", "Stolen_Found_Counts.csv"), show_col_types = FALSE)
@@ -441,21 +506,14 @@ ggplot(animated_data, aes(x = Offence_Category, y = Number_of_Offences, fill = O
 </div> \ 
 
 <div class="main-body">
-  <p>The tallest bar, representing "Bikes Stolen," towers above the others with over <strong style="color: #FFC107;">32,000</strong> reported incidents, emphasizing how prevalent bike theft has become across the city of Toronto. <a href="https://www.ctvnews.ca/canada/should-toronto-tear-up-its-bike-lanes-to-improve-traffic-flow-critics-say-it-s-not-so-simple-1.7103768" style="color: #FFC107; text-decoration: underline;">CTV news</a> have highlighted hotspots, including downtown Toronto and areas near major transit hubs, where cyclists frequently leave bikes unattended. In response, The Toronto Police Service (TPS) has introduced <a href="https://www.tps.ca/media-centre/news-releases/fix-title-project-sentry/" style="color: #FFC107; text-decoration: underline;">Project Sentry</a>, an initiative led by officers in 14 Division aimed at recovering stolen bicycles and reuniting them with their rightful owners across the city. This program is part of TPS’s effort to address the high rates of bike theft and improve recovery outcomes for Toronto cyclists. </p>
+  <p>The tallest bar, representing "Bikes Stolen," towers above the others with over <strong style="color: #FFC107;">32,000</strong> reported incidents, emphasizing how prevalent bike theft has become across the city of Toronto. <a href="https://www.ctvnews.ca/canada/should-toronto-tear-up-its-bike-lanes-to-improve-traffic-flow-critics-say-it-s-not-so-simple-1.7103768" style="color: #FFC107; text-decoration: underline;">CTV news</a> (@citeCTV) have highlighted hotspots, including downtown Toronto and areas near major transit hubs, where cyclists frequently leave bikes unattended. In response, The Toronto Police Service (TPS) has introduced <a href="https://www.tps.ca/media-centre/news-releases/fix-title-project-sentry/" style="color: #FFC107; text-decoration: underline;">Project Sentry</a> (@citeTPSProjectSentry), an initiative led by officers in 14 Division aimed at recovering stolen bicycles and reuniting them with their rightful owners across the city. This program is part of TPS’s effort to address the high rates of bike theft and improve recovery outcomes for Toronto cyclists. </p>
 
- <p>In contrast, the "Bikes Found" bar, with only <strong style="color: #FFC107;">422</strong> cases, reveals a deep gap in recovery efforts. The small size of this bar underscores how difficult it is to retrieve stolen bikes and reunite them with their owners, suggesting a systemic issue in tracking and identifying stolen bicycles. Although Toronto has introduced <a href="https://project529.com/garage" style="color: #FFC107; text-decoration: underline;">Project 529</a> to help track ownership, recovery rates remain low, partly due to limited resources and the challenge of identifying recovered bikes that may have been altered or resold. </p> 
+ <p>In contrast, the "Bikes Found" bar, with only <strong style="color: #FFC107;">422</strong> cases, reveals a deep gap in recovery efforts. The small size of this bar underscores how difficult it is to retrieve stolen bikes and reunite them with their owners, suggesting a systemic issue in tracking and identifying stolen bicycles. Although Toronto has introduced <a href="https://project529.com/garage" style="color: #FFC107; text-decoration: underline;">Project 529</a> (@cite529) to help track ownership, recovery rates remain low, partly due to limited resources and the challenge of identifying recovered bikes that may have been altered or resold. </p> 
 
  <p>The "Other" category, with around <strong style="color: #FFC107;">3,200</strong> cases, includes incidents such as attempted thefts, damage to bikes, mischief, and other related offenses. This category highlights a broader issue affecting bike security, indicating that many cyclists encounter safety challenges even when their bikes aren’t ultimately stolen. </p>
 
 <center>
 ```{r animated_line_plot, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=5, fig.height=3}
-# Load necessary libraries
-library(ggplot2)
-library(gganimate)
-library(dplyr)
-library(hrbrthemes)
-library(readr)
-library(here)
 
 # Load your data
 data <- read_csv(here("data", "Bicycle_Theft_Monthly_Counts.csv"), show_col_types = FALSE)
@@ -504,7 +562,7 @@ animate(plot, nframes = 100, fps = 10)
 
 @animated_line_plot illustrates the monthly patterns of bicycle thefts in Toronto from 2014 to mid-2024, revealing a clear seasonal trend. Each year, bike thefts rise steadily in the spring, peak during the summer months of June and July, and then decline in the fall and winter when cycling activity decreases. This predictable pattern aligns with Toronto's warmer months when more residents choose biking as their primary mode of transportation or recreation, leading to increased exposure of bikes in public spaces. These high-theft months underline the need for heightened security measures and awareness among cyclists, particularly during summer.
 
-The year 2020, however, deviates from this regular trend due to the impact of the COVID-19 pandemic. As public transit options were considered risky, many Torontonians turned to bicycles as a safer and more flexible transportation option, resulting in a rise in bike ownership and driving up theft rates (@citeshapiro2021). Additionally, the pandemic stretched police resources, potentially limiting routine patrols and recovery efforts. The 2020 increase highlights how external factors, such as a public health crisis, can exacerbate bike theft trends and points to the importance of adaptable theft prevention strategies in response to changing urban transportation needs.
+The year 2020, however, deviates from this regular trend due to the impact of the COVID-19 pandemic. As public transit options were considered risky, many Torontonians turned to bicycles as a safer and more flexible transportation option, resulting in a rise in bike ownership and driving up theft rates (@citeShapiro2021). Additionally, the pandemic stretched police resources, potentially limiting routine patrols and recovery efforts. The 2020 increase highlights how external factors, such as a public health crisis, can exacerbate bike theft trends and points to the importance of adaptable theft prevention strategies in response to changing urban transportation needs.
 
 <div class="section-heading">
   <span class="section-title-line1">Mapping the Danger Zones:</span><br>
@@ -518,31 +576,20 @@ The year 2020, however, deviates from this regular trend due to the impact of th
 ```{r interactive_map, echo=FALSE, warning=FALSE, message=FALSE}
 #### Map with Markers ####
 
-# Load necessary libraries
-library(dplyr)         # Provides functions for data manipulation.
-library(leaflet)       # Enables interactive maps.
-library(purrr)         # Contains functional programming tools, used here to walk through data.
-library(readr)         # Provides functions to read rectangular data like CSV files.
-library(here)          # Helps manage file paths in a more robust way.
-
-# Load your dataset (adjust the file path accordingly)
+# Load your dataset
 map_data <- read_csv(here("data", "map_by_neighbourhoods_data.csv"), show_col_types = FALSE)
-# Loads the CSV file from the specified path using the 'here()' function for consistent path management.
-# 'show_col_types = FALSE' suppresses messages about the data types of each column.
 
 # Modify the data frame, categorizing case_num column
 map_data <- map_data %>% 
   mutate(
     mag.level = cut(case_num, c(100, 500, 1000, 1500),
                     labels = c('> 100 & <=500', '>500 & <=1000', '>1000 & <=1500'))
-    # Creates a 'mag.level' column that categorizes 'case_num' into three levels based on specified ranges.
   ) %>%
-  split(.$mag.level)  # Splits the dataset into a list of data frames by 'mag.level'.
+  split(.$mag.level)
 
 # Initialize the leaflet map
 l <- leaflet() %>%
   addProviderTiles(providers$Esri.OceanBasemap)
-# Initializes a Leaflet map object and adds a base tile layer from the Esri Ocean Basemap provider.
 
 # Add the markers to the map for each case_num level
 names(map_data) %>%
@@ -562,14 +609,6 @@ names(map_data) %>%
         clusterOptions = markerClusterOptions()
       )
   })
-# Iterates over the names of the 'map_data' list (which are the different 'mag.level' categories).
-# For each category, it adds markers to the map:
-# - `data = map_data[[df]]`: Uses the split data for the current case_num level.
-# - `lng = ~longitude, lat = ~latitude`: Sets longitude and latitude for marker placement.
-# - `label`: Displays the 'case_num' value when markers are hovered over.
-# - `popup`: Displays additional information (hood_num, stolen_place, cost, status, and case_num) when a marker is clicked.
-# - `group = df`: Groups the markers by 'mag.level'.
-# - `clusterOptions = markerClusterOptions()`: Enables clustering of markers for better visualization.
 
 # Add layer controls and a minimap
 l <- l %>%
@@ -578,11 +617,10 @@ l <- l %>%
     options = layersControlOptions(collapsed = FALSE)
   ) %>%
   addMiniMap(tiles = providers$Esri.OceanBasemap, width = 120, height = 80)
-# Adds layer controls to allow switching between different 'mag.level' categories on the map.
-# Adds a minimap showing a small overview of the area using the Esri Ocean Basemap.
 
 # Display the Map
 l
+
 ```
 </center>
 
@@ -591,15 +629,10 @@ l
 </div> \ 
 
 <div class="main-body">
-  <p>In @map_of_stolen_bike, we dive deeper into the city with a ground-level view—a sea of red dots each marks an individual theft incident. The dots are packed tightly in certain neighborhoods, sprawling across downtown Toronto like a dense red blanket. It paints a vivid picture of the density of bike thefts—evidence that the bustling central part of the city faces a higher risk. Street after street is littered with these red markers, almost as if each streetlight bore witness to a theft. There’s a sharp concentration near transit hubs and popular neighborhoods, suggesting a correlation between foot traffic, bike use, and crime opportunity. The City has been making efforts to combat this issue; for example, Cycle Toronto launched the <a href="https://www.cycleto.ca/council-talking-about-ending-bike-theft-week" target="_blank" style="color: #FFC107; text-decoration: underline;">#EndBikeTheft campaign</a>, advocating for secure parking and better registration systems, with city discussions exploring collaboration with platforms like <a href="https://project529.com/garage" style="color: #FFC107; text-decoration: underline;">529 Garage</a> to help reduce and recover stolen bikes (@citeEndBikeTheft). It’s almost as though you can hear the honks and feel the rush of people in these crowded streets.</p>
+  <p>In @map_of_stolen_bike, we dive deeper into the city with a ground-level view—a sea of red dots each marks an individual theft incident. The dots are packed tightly in certain neighborhoods, sprawling across downtown Toronto like a dense red blanket. It paints a vivid picture of the density of bike thefts—evidence that the bustling central part of the city faces a higher risk. Street after street is littered with these red markers, almost as if each streetlight bore witness to a theft. There’s a sharp concentration near transit hubs and popular neighborhoods, suggesting a correlation between foot traffic, bike use, and crime opportunity. The City has been making efforts to combat this issue; for example, Cycle Toronto launched the <a href="https://www.cycleto.ca/council-talking-about-ending-bike-theft-week" target="_blank" style="color: #FFC107; text-decoration: underline;">#EndBikeTheft campaign</a> (@citeEndBikeTheft), advocating for secure parking and better registration systems, with city discussions exploring collaboration with platforms like <a href="https://project529.com/garage" style="color: #FFC107; text-decoration: underline;">529 Garage</a> (@cite529) to help reduce and recover stolen bikes. It’s almost as though you can hear the honks and feel the rush of people in these crowded streets.</p>
 
 <center>
 ```{r map_of_stolen_bike, echo=FALSE, warning=FALSE, message=FALSE}
-# Load necessary libraries
-library(ggplot2)
-library(sf)
-library(osmdata)
-library(here)
 
 # Load cleaned coordinates data
 coordinates_data <- read.csv(here("data/cleaned_coordinates_data.csv"))
@@ -623,7 +656,7 @@ bike_theft_plot <- ggplot() +
   geom_sf(data = streets, color = "gray", size = 0.3, alpha = 0.6) + # OSM street map layer
   geom_point(
     data = coordinates_data, aes(x = longitude, y = latitude),
-    size = 0.5, color = "red"
+    size = 0.5, color = "#FFC107"
   ) + # Bike theft points
   labs(
     title = "Map of Stolen Bike Cases in Toronto",
@@ -642,6 +675,7 @@ bike_theft_plot <- ggplot() +
   )
 
 bike_theft_plot
+
 ```
 </center>
 
@@ -655,16 +689,6 @@ bike_theft_plot
 <center>
 ```{r map_case_number, echo=FALSE, warning=FALSE, message=FALSE}
 #### Map with Areas ####
-
-# Load necessary libraries
-library(dplyr)
-library(readr)
-library(ggplot2)
-library(plotly)
-library(sf)
-library(crosstalk)
-library(here)
-library(osmdata)
 
 # Load your dataset (adjust the file path accordingly)
 map_data <- read_csv(here("data", "map_by_area_data.csv"), show_col_types = FALSE)
@@ -683,6 +707,13 @@ streets <- toronto_map$osm_lines
 # Generate a similar plot using ggplot2 and plotly
 shared_data <- crosstalk::SharedData$new(map_data)
 
+# Define more detailed breaks for color scale based on `case_num`
+max_case_num <- max(map_data$case_num, na.rm = TRUE)
+color_breaks <- seq(0, max_case_num, by = max_case_num / 4)
+
+# Create a rounding function to simplify the labels
+rounded_labels <- function(x) scales::comma(round(x, -6))
+
 # Create ggplot object with the dataset and Toronto map as a background
 ggplot_map <- ggplot() +
   geom_sf(data = streets, color = "lightgray", size = 0.3, alpha = 0.6) +  # Add OSM street map layer
@@ -700,8 +731,8 @@ ggplot_map <- ggplot() +
     panel.grid.minor = element_blank(),
     axis.text.x = element_text(angle = 45, hjust = 1)
   ) +
-  scale_color_continuous(labels = scales::comma) +
-  scale_size_continuous(range = c(3, 12)) # Adjust range values to control the size of points
+  scale_color_gradientn(colors = c("#603601", "#FFC107"), breaks = color_breaks, labels = rounded_labels) +
+  scale_size_continuous(range = c(3, 12))
 
 # Convert ggplot object to interactive plotly object
 plotly_map <- ggplotly(ggplot_map, tooltip = "text") %>%
@@ -737,4 +768,8 @@ plotly_map
 <div class="main-body">
   <p>This article is a reminder: as cycling grows in popularity, so does the risk of theft. Whether you’re a daily commuter or a weekend rider, taking extra precautions—like using a sturdy lock, parking in well-lit areas, and registering your bike—can make a big difference. Protect your bike, and keep Toronto’s cycling community rolling safely all year round.</p>
 
-# Citations
+<div class="section-heading">
+  <span class="section-title-line1">Citations</span><br>
+</div>
+
+
