@@ -179,6 +179,8 @@ thanks: "Code and data are available at: [https://github.com/iJustinn/Toronto_Bi
   <p>In this analysis, we dig into over a decade’s worth of data from the <a href="https://data.torontopolice.on.ca/datasets/TorontoPS::bicycle-thefts-open-data/about" target="_blank" style="color: #FFC107; text-decoration: underline;">Toronto Police Service</a> (Toronto Police Service, 2024c) to answer key questions: When are bikes at the greatest risk? What makes a bike more likely to be targeted? And where are the theft hotspots cyclists should avoid? Each section of our article addresses a different angle of bike theft in Toronto, from seasonal and weekly theft patterns to variations by bicycle type and value, to pinpointing the city’s most high-risk locations.</p>
 
   <p>Over the past decade, <strong style="color: #FFC107;">32,489</strong> bike thefts have been reported in Toronto, yet only <strong style="color: #FFC107;">422</strong> of these stolen bikes were successfully recovered. With these insights, we aim to empower cyclists with knowledge that can help them safeguard their bikes and inform Cycle Toronto and local authorities about the areas most in need of intervention. Read on as we trace theft trends over the years, reveal the high-risk locations, and provide practical advice to help protect your bike.</p>
+  
+  <p>But rather than just telling you the facts, let’s try something different—how about hearing it straight from the perspective of a <strong>bike?</strong></p>
 </div>
 
 <div class="main-body">
@@ -310,7 +312,7 @@ fig
 
 <p>You see, Fridays are chaotic. People rush to wrap up their week, juggling work and plans for the weekend. Some leave us in high-traffic zones, near pubs or downtown hotspots, forgetting how vulnerable we are. By Saturday and Sunday, the risk eases up a bit. Fewer commutes, fewer hurried stops. But Fridays? Fridays are a minefield.</p>
 
-<p>If only they knew what the data shows. Advocacy groups like <a href="https://www.cycleto.ca/" target="_blank" style="color: #FFC107; text-decoration: underline;">Cycle Toronto</a> (Cycle Toronto, 2021) have been raising awareness about these patterns. Perhaps one day, local authorities will patrol more on Fridays or run public awareness campaigns around hotspots. And for cyclists, knowing that Friday is the peak day for thefts might encourage them to lock us more securely or park in safer areas. I just hope these efforts take hold before more of us end up as another Friday statistic.</p\ 
+<p>If only they knew what the data shows. Advocacy groups like <a href="https://www.cycleto.ca/" target="_blank" style="color: #FFC107; text-decoration: underline;">Cycle Toronto</a> (Cycle Toronto, 2021) have been raising awareness about these patterns. Perhaps one day, local authorities will patrol more on Fridays or run public awareness campaigns around hotspots. And for cyclists, knowing that Friday is the peak day for thefts might encourage them to lock us more securely or park in safer areas. I just hope these efforts take hold before more of us end up as another Friday statistic.</p>
 </div>
 
 <center>
@@ -856,7 +858,7 @@ plotly_map
   
   <p>But beyond individual actions, we need a community effort. Cyclists, advocacy groups, and city planners must come together to create a <strong style="color: #FFC107;">safer</strong> Toronto. More secure bike parking, stronger recovery programs, and greater public awareness are the tools we need to keep rolling with confidence. For bikes like me, it’s not just about avoiding theft; it’s about helping Toronto’s cycling community thrive—through every season, every neighborhood, and every ride.</p>
   
-  <p>So as you unlock me and hop on for your next journey, remember this: every precaution you take protects not just me, but the joy of cycling itself. Together, let’s keep Toronto’s streets vibrant, its riders safe, and its bikes where they belong—under the sun, on the move, and by your side.</p>
+  <p>So as you unlock me and hop on for your next journey, remember this: every precaution you take protects not just me, but the joy of cycling itself. Together, let’s keep Toronto’s streets vibrant, its riders safe, and its bikes where they belong—under the sun, on the move, and by your side!</p>
 </div>
 
 <div class="section-heading">
