@@ -178,17 +178,11 @@ thanks: "Code and data are available at: [https://github.com/iJustinn/Toronto_Bi
 
   <p>In this analysis, we dig into over a decade’s worth of data from the <a href="https://data.torontopolice.on.ca/datasets/TorontoPS::bicycle-thefts-open-data/about" target="_blank" style="color: #FFC107; text-decoration: underline;">Toronto Police Service</a> (Toronto Police Service, 2024c) to answer key questions: When are bikes at the greatest risk? What makes a bike more likely to be targeted? And where are the theft hotspots cyclists should avoid? Each section of our article addresses a different angle of bike theft in Toronto, from seasonal and weekly theft patterns to variations by bicycle type and value, to pinpointing the city’s most high-risk locations.</p>
 
-  <p>Over the past decade, <strong style="color: #FFC107;">32,489</strong> bike thefts have been reported in Toronto, yet only <strong style="color: #FFC107;">422</strong> of these stolen bikes were successfully recovered. With these insights, we aim to empower cyclists with knowledge that can help them safeguard their bikes and inform Cycle Toronto and local authorities about the areas most in need of intervention. Read on as we trace theft trends over the years, reveal the high-risk locations, and provide practical advice to help protect your bike.</p>
-  
-  <p>But rather than just telling you the facts, let’s try something different—how about hearing it straight from the perspective of a <strong>bike?</strong></p>
-</div>
+  <p>Over the past decade, <strong style="color: #FFC107;">32,489</strong> bike thefts have been reported in Toronto, yet only <strong style="color: #FFC107;">422</strong> of these stolen bikes were successfully recovered. With these insights, we aim to empower cyclists with knowledge that can help them safeguard their bikes and inform Cycle Toronto and local authorities about the areas most in need of intervention. Read on as we trace theft trends over the years, reveal the high-risk locations, and provide practical advice to help protect your bike. But rather than just telling you the facts, let’s try something different—how about hearing it straight from the perspective of a <strong>bike:</strong></p>
 
-<div class="main-body">
   <p>Hi there! I’m a bicycle—just your regular two-wheeled friend. I’m here to take you places, let you feel the wind in your hair, and help you enjoy the streets of Toronto. Life might seem easy for me, but it’s not all smooth rides. In this city, there’s one big worry I face all the time: bike theft. And believe me, I’ve seen plenty of it.</p>
   
   <p>Picture this: you lock me up on a busy Toronto street, thinking a strong lock and a little care will keep me safe. But the truth is, some seasons, certain types of bikes, and even specific areas make bikes like me much more likely to be stolen. Over the years, bike theft has gone from something that “might happen” to something we constantly have to worry about. But don’t worry—I’ve joined forces with some data experts to figure out what’s really happening.</p>
-  
-  <p>We’ve looked at over ten years of data from the <a href="https://data.torontopolice.on.ca/datasets/TorontoPS::bicycle-thefts-open-data/about" target="_blank" style="color: #FFC107; text-decoration: underline;">Toronto Police Service</a> (Toronto Police Service, 2024c) to answer some big questions: When are bikes like me at the most risk? What makes us targets? And which parts of Toronto should we avoid? Over this time, <strong style="color: #FFC107;">32,489</strong> bikes have been reported stolen in Toronto, but only <strong style="color: #FFC107;">422</strong> were ever recovered. With these insights, we hope to give cyclists like you the knowledge to protect us better, while helping groups like Cycle Toronto and local officials focus on areas that need the most attention. Together, we’ll uncover theft trends, identify high-risk locations, and share practical tips to keep your bike safe and secure.</p>
 </div>
 
 
@@ -715,6 +709,14 @@ l
   <p>But not all hope is lost. Advocacy groups like Cycle Toronto have stepped up with initiatives like the <a href="https://www.cycleto.ca/council-talking-about-ending-bike-theft-week" target="_blank" style="color: #FFC107; text-decoration: underline;">#EndBikeTheft campaign</a> (Cycle Toronto, 2021), pushing for safer parking and better registration systems. There’s even talk of teaming up with platforms like <a href="https://project529.com/garage" style="color: #FFC107; text-decoration: underline;">529 Garage</a> (Project 529, 2024) to track us better and help us get back home if we’re ever taken. It’s a start, and with more efforts like these, maybe one day those yellow dots won’t cover the map quite so densely.</p>
 </div>
 
+
+<div class="main-body">
+  <p>Take a broader look at the view of the city—it’s like flying in the sky for a little bit. A sea of <strong style="color: #FFC107;">yellow</strong> dots stretches across the map, each one marking where a bike like me was stolen (see "Map of Stolen Bike Cases in Toronto" below). Areas with denser clusters of dots indicate theft hotspots where many incidents have been reported, while lighter or sparser areas suggest fewer thefts. In downtown Toronto, these dots are packed so tightly it looks like a thick yellow blanket covering the streets. It’s a clear reminder that the busy central parts of the city are the riskiest for us. Transit hubs and popular neighborhoods show the highest concentration, likely because they have the most people, bikes, and unfortunately, opportunities for theft.</p>
+  
+  <p>But not all hope is lost. Advocacy groups like Cycle Toronto have stepped up with initiatives like the <a href="https://www.cycleto.ca/council-talking-about-ending-bike-theft-week" target="_blank" style="color: #FFC107; text-decoration: underline;">#EndBikeTheft campaign</a> (Cycle Toronto, 2021), pushing for safer parking and better registration systems. There’s even talk of teaming up with platforms like <a href="https://project529.com/garage" style="color: #FFC107; text-decoration: underline;">529 Garage</a> (Project 529, 2024) to track us better and help us get back home if we’re ever taken. It’s a start, and with more efforts like these, maybe one day those yellow dots won’t cover the map quite so densely.</p>
+</div>
+
+
 <center>
 ```{r map_of_stolen_bike, echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=8, fig.height=4}
 
@@ -740,7 +742,7 @@ bike_theft_plot <- ggplot() +
   geom_sf(data = streets, color = "gray", size = 0.3, alpha = 0.6) + # OSM street map layer
   geom_point(
     data = coordinates_data, aes(x = longitude, y = latitude),
-    size = 0.3, color = "#FFC107"
+    size = 0.45, color = "#FFC107", alpha = 0.15
   ) + # Bike theft points
   labs(
     title = "Map of Stolen Bike Cases in Toronto",
@@ -752,9 +754,9 @@ bike_theft_plot <- ggplot() +
   ) +
   theme_minimal() +
   theme(
-    panel.background = element_blank(), # Remove panel background
-    panel.grid.major = element_blank(), # Remove major grid lines
-    panel.grid.minor = element_blank(), # Remove minor grid lines
+    panel.background = element_blank(),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
     axis.text.x = element_text(angle = 45, hjust = 1)
   )
 
@@ -768,9 +770,9 @@ bike_theft_plot
 </div>
 
 <div class="main-body">
-  <p>The map below gave us another step back, which is a chance for us to see how each areas compare when it comes to bike theft. It’s a colorful scene, with bubbles of different sizes and shades showing how many of us have been stolen in each area. The larger the bubble, the more incidents it represents. And right in the heart of the city is a massive <strong style="color: #FFC107;">yellow</strong> circle, covering downtown Toronto. It’s like a giant warning sign, confirming what we already know: the core of the city is the most dangerous place for bikes like me.</p>
+  <p>The map below takes a broader look, comparing bike theft incidents across different areas in Toronto. Each circle represents the number of theft cases in a region, with larger and brighter circles indicating higher numbers. At the center of the city, a massive <strong style="color: #FFC107;">yellow</strong> circle dominates the map, marking downtown Toronto as the hotspot for bike thefts. It’s clear that the dense urban core, with its high bike usage and heavy foot traffic, is where bikes like me are most at risk.</p>
   
-  <p>Further out, the bubbles shrink, and the map starts to feel calmer. These smaller circles mark neighborhoods where thefts are less common, offering a glimpse of what safety might look like. It’s a sharp divide—some areas are hotspots, buzzing with theft activity, while others stay quiet and safer. For bikes like me, maps like this are a lifeline, helping us and our riders navigate Toronto’s streets with a better sense of where to stay extra cautious.</p>
+  <p>As we move away from the city center, the circles shrink and darken, representing areas with fewer reported thefts. These quieter neighborhoods show the clear contrast between high-risk zones and safer regions, highlighting how geography plays a role in bike security. Maps like this aren’t just data—they’re lifelines for bikes like me and our riders, offering a guide to navigating Toronto’s streets with caution and awareness of where the greatest risks lie.</p>
 </div>
 
 <center>
@@ -846,7 +848,9 @@ plotly_map
   
   <p>We then explored where bike thefts happen, pinpointing hotspots like downtown Toronto and busy transit hubs where the risk is highest. The maps painted a clear picture of these danger zones, giving both cyclists and city planners a guide to where extra security measures are most urgently needed.</p>
   
-  <p>Altogether, these visualizations offer a complete story of Toronto’s bike theft problem. They show the when, where, and why of theft, giving insights that can inspire action. Moving forward, Toronto can do more to protect bikes like me by creating more secure parking, working closely with registration platforms like Project 529, and expanding targeted programs like Project Sentry in high-risk areas. Maybe future studies will take this analysis nationwide, shedding light on bike theft patterns across Canada. With all these efforts combined, cyclists, city officials, and advocacy groups can work together to make Toronto a <strong style="color: #FFC107;">safer</strong> place for bikes like me to ride, rest, and thrive.</p>
+  <p>Altogether, these visualizations offer a complete story of Toronto’s bike theft problem. They show the when, where, and why of theft, giving insights that can inspire action. However, there’s still room to improve how we handle this data to make the insights even clearer and more actionable. For example, instead of ignoring incomplete entries, filling in missing details in ways that preserve key trends could offer a more complete picture. Additionally, breaking down regions into smaller, more specific areas could highlight particular streets or blocks where thefts are most frequent. This would allow for more focused responses and targeted solutions, ultimately making the findings more reliable and impactful.</p>
+  
+  <p>Moving forward, Toronto can do more to protect bikes like me by creating more secure parking, working closely with registration platforms like Project 529, and expanding targeted programs like Project Sentry in high-theft areas. Maybe future studies will take this analysis nationwide, shedding light on bike theft patterns across Canada. With all these efforts combined, cyclists, city officials, and advocacy groups can work together to make Toronto a <strong style="color: #FFC107;">safer</strong> place for bikes like me to ride, rest, and thrive.</p>
 </div>
 
 <div class="section-heading">
